@@ -1,4 +1,5 @@
 import { getModelForClass, index, pre, prop } from '@typegoose/typegoose';
+import { Role } from 'common/types/Role';
 import { hash } from 'common/utils/hash';
 import { Field, ObjectType } from 'type-graphql';
 
@@ -25,6 +26,9 @@ export class User {
   @Field(() => String)
   @prop({ required: true })
   password: string;
+
+  @Field(() => [Role])
+  roles: string[];
 }
 
 export const UserModel = getModelForClass<typeof User>(User);

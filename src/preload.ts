@@ -1,7 +1,7 @@
 import express from 'express';
 import { AuthChecker, buildSchema } from 'type-graphql';
 import { ApolloServer } from 'apollo-server-express';
-import { GraphQLSchema } from 'graphql';
+import { GraphQLError, GraphQLSchema } from 'graphql';
 import cookieParser from 'cookie-parser';
 import Context from 'common/types/Context';
 import { resolvers } from 'resolvers';
@@ -13,13 +13,25 @@ import { verifyJwt } from 'common/utils/jwt';
 import { User } from 'schemas/user.schema';
 import { connectToMongo } from 'common/utils/mongo';
 
-const authChecker: AuthChecker<Context> = function ({
-  root,
-  args,
-  context,
-  info,
-}) {
-  if (context.user) {
+// TODO: migrate: apollo-server-express to Apollo Server v3
+// TODO: access and refresh token
+// https://www.apollographql.com/docs/apollo-server/security/authentication/
+
+const authChecker: AuthChecker<Context> = function (
+  { context: { user } },
+  roles,
+) {
+  if (roles.length === 0) {
+    if (user) {
+      return true;
+    }
+  }
+
+  if (!user) {
+    return false;
+  }
+
+  if (user.roles.some((role) => role.includes(role))) {
     return true;
   }
   return false;
@@ -36,12 +48,15 @@ async function createApolloServer(schema: GraphQLSchema) {
     schema,
     context: (ctx: Context) => {
       const context = ctx;
-      const { accessToken } = context.req.cookies;
+      const { accessToken, refreshToken } = context.req.cookies;
       if (context.req.cookies.accessToken) {
         // verify the user authorization
-        context.user = verifyJwt<User>(accessToken);
+        // todo: map user from req
+        const authorized = verifyJwt(accessToken);
+        if (authorized) {
+          context.user = {}; // map from db
+        }
       }
-
       return context;
     },
     plugins: [getApolloServerPlugins()],
@@ -67,7 +82,9 @@ export async function bootstrap() {
     },
     () => {
       if (process.env.NODE_ENV === 'development') {
-        console.log('Playground http://localhost:4000/graphql');
+        console.log(
+          'Server is running, GraphQL Playground available at http://localhost:4000/graphql',
+        );
       }
     },
   );

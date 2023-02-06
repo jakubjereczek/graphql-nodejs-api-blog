@@ -1,5 +1,7 @@
+import Context from 'common/types/Context';
 import config from 'config';
 import jwt from 'jsonwebtoken';
+import { User } from 'schemas/user.schema';
 
 const publicKey = Buffer.from(
   config.get<string>('publicKey'),
@@ -25,4 +27,28 @@ export function verifyJwt<T>(token: string): T | null {
   } catch (err) {
     return null;
   }
+}
+
+interface ValidateAuthorizationArgs {
+  context: Context;
+}
+
+// todo
+export function validateAuthorization({ context }: ValidateAuthorizationArgs) {
+  if (context.req.cookies.accessToken) {
+    const user = verifyJwt<User>(context.req.cookies.accessToken);
+    if (user) {
+      context.user = user;
+    } else if (context.req.cookies.refreshToken) {
+      if (verifyJwt(context.req.cookies.refreshToken)) {
+        const newAccessToken = signJwt(user, {});
+        const cookieOptions = {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+        };
+        context.res.cookie('accessToken');
+      }
+    }
+  }
+  return context;
 }
