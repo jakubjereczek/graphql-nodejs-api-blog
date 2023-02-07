@@ -1,7 +1,7 @@
 import express from 'express';
 import { AuthChecker, buildSchema } from 'type-graphql';
 import { ApolloServer } from 'apollo-server-express';
-import { GraphQLError, GraphQLSchema } from 'graphql';
+import { GraphQLSchema } from 'graphql';
 import cookieParser from 'cookie-parser';
 import Context from 'common/types/Context';
 import { resolvers } from 'resolvers';
@@ -9,13 +9,14 @@ import {
   ApolloServerPluginLandingPageGraphQLPlayground,
   ApolloServerPluginLandingPageProductionDefault,
 } from 'apollo-server-core';
-import { verifyJwt } from 'common/utils/jwt';
-import { User } from 'schemas/user.schema';
+import { validateAuthorization } from 'common/utils/jwt';
 import { connectToMongo } from 'common/utils/mongo';
 
 // TODO: migrate: apollo-server-express to Apollo Server v3
-// TODO: access and refresh token
+// TODO: rewrite auth utils to separate class
+// TODO: improved GraphQL errors
 // https://www.apollographql.com/docs/apollo-server/security/authentication/
+// https://codevoweb.com/react-node-access-refresh-tokens-authentication/
 
 const authChecker: AuthChecker<Context> = function (
   { context: { user } },
@@ -48,14 +49,8 @@ async function createApolloServer(schema: GraphQLSchema) {
     schema,
     context: (ctx: Context) => {
       const context = ctx;
-      const { accessToken, refreshToken } = context.req.cookies;
-      if (context.req.cookies.accessToken) {
-        // verify the user authorization
-        // todo: map user from req
-        const authorized = verifyJwt(accessToken);
-        if (authorized) {
-          context.user = {}; // map from db
-        }
+      if (context.req.cookies.refresh_token) {
+        return validateAuthorization({ context });
       }
       return context;
     },
