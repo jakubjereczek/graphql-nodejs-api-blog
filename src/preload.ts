@@ -9,12 +9,13 @@ import {
   ApolloServerPluginLandingPageGraphQLPlayground,
   ApolloServerPluginLandingPageProductionDefault,
 } from 'apollo-server-core';
-import { validateAuthorization } from 'common/utils/jwt';
 import { connectToMongo } from 'common/utils/mongo';
+import Authorization from 'common/Authorization/Authorization';
 
 // TODO: migrate: apollo-server-express to Apollo Server v3
 // TODO: rewrite auth utils to separate class
 // TODO: improved GraphQL errors
+// TODO: ADD @Unauthorizated
 // https://www.apollographql.com/docs/apollo-server/security/authentication/
 // https://codevoweb.com/react-node-access-refresh-tokens-authentication/
 
@@ -47,12 +48,8 @@ function getApolloServerPlugins() {
 async function createApolloServer(schema: GraphQLSchema) {
   const server = new ApolloServer({
     schema,
-    context: (ctx: Context) => {
-      const context = ctx;
-      if (context.req.cookies.refresh_token) {
-        return validateAuthorization({ context });
-      }
-      return context;
+    context: (context: Context) => {
+      return Authorization.validate(context);
     },
     plugins: [getApolloServerPlugins()],
   });

@@ -1,10 +1,10 @@
 import { Request, Response } from 'express';
-import { User } from 'schemas/user.schema';
+import { UserIdentifier } from './User';
 
 interface Context {
   req: Request;
   res: Response;
-  user: User | null;
+  user: UserIdentifier | null;
 }
 
 export default Context;
