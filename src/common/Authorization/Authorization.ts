@@ -22,11 +22,11 @@ class Authorization {
       const decoded = Authorization.decodeToken<UserIdentifier>(access_token);
 
       if (decoded) {
-        const currentUser = await UserModel.find()
-          .findByEmail(decoded.email)
-          .lean();
-        if (currentUser) {
-          context.user = mapUserIntoUserIdentifier(currentUser);
+        const user = await UserModel.find().findByEmail(decoded.email).lean();
+        if (user) {
+          context.user = mapUserIntoUserIdentifier(user);
+        } else {
+          throw new ApolloError('403');
         }
       } else {
         const decoded =
@@ -35,15 +35,13 @@ class Authorization {
           throw new ApolloError('403');
         }
 
-        const currentUser = await UserModel.find()
-          .findByEmail(decoded.email)
-          .lean();
-        if (!currentUser) {
+        const user = await UserModel.find().findByEmail(decoded.email).lean();
+        if (!user) {
           throw new ApolloError('403');
         }
 
         Authorization.signAndSetAuthorizationTokens(
-          mapUserIntoUserIdentifier(currentUser),
+          mapUserIntoUserIdentifier(user),
           context,
         );
       }

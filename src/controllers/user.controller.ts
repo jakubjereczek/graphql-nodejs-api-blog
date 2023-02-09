@@ -21,18 +21,18 @@ export class UserController {
   }
 
   async authorizeUser(input: AuthorizeUserInput, context: Context) {
-    const currentUser = await UserModel.find().findByEmail(input.email).lean();
-    if (!currentUser) {
+    const user = await UserModel.find().findByEmail(input.email).lean();
+    if (!user) {
       throw new ApolloError('Invalid email or password.');
     }
 
-    const password = await compare(input.password, currentUser.password);
+    const password = await compare(input.password, user.password);
     if (!password) {
       throw new ApolloError('Invalid email or password.');
     }
 
     return Authorization.signAndSetAuthorizationTokens(
-      mapUserIntoUserIdentifier(currentUser),
+      mapUserIntoUserIdentifier(user),
       context,
     );
   }
