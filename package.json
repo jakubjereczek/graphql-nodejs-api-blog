@@ -6,7 +6,8 @@
   "scripts": {
     "start": "ts-node -r tsconfig-paths/register src/index.ts",
     "dev": "ts-node-dev -r tsconfig-paths/register --respawn --transpile-only src/index.ts",
-    "test": "npx jest"
+    "test": "npx jest",
+    "lint": "eslint . --ext .ts --ext .mts"
   },
   "author": "",
   "license": "ISC",
