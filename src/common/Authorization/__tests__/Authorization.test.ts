@@ -39,7 +39,10 @@ describe('Authorization tests', () => {
       ).mockResolvedValue(mockedUser);
       await Authorization.validate(mockedContext);
 
-      expect(verifyJwt).toHaveBeenCalledWith(mockedTokens.access_token);
+      expect(verifyJwt).toHaveBeenCalledWith(
+        mockedTokens.access_token,
+        'access',
+      );
     });
 
     it('should update the context user if the access_token is successfully decoded', async () => {
@@ -75,7 +78,10 @@ describe('Authorization tests', () => {
       ).mockResolvedValue(mockedUser);
       await Authorization.validate(mockedContext);
 
-      expect(verifyJwt).toHaveBeenCalledWith(mockedTokens.refresh_token);
+      expect(verifyJwt).toHaveBeenCalledWith(
+        mockedTokens.refresh_token,
+        'refresh',
+      );
     });
 
     it('should throw an ApolloError when tried to decode the refresh_token and wasnt valid', () => {
@@ -84,7 +90,10 @@ describe('Authorization tests', () => {
         .mockImplementationOnce(() => null);
 
       Authorization.validate(mockedContext).catch((error) => {
-        expect(verifyJwt).toHaveBeenLastCalledWith(mockedTokens.refresh_token);
+        expect(verifyJwt).toHaveBeenLastCalledWith(
+          mockedTokens.refresh_token,
+          'refresh',
+        );
         expect(error).toBeInstanceOf(ApolloError);
       });
     });

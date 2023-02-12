@@ -12,13 +12,6 @@ import {
 import { connectToMongo } from 'common/utils/mongo';
 import Authorization from 'common/Authorization/Authorization';
 
-// TODO: migrate: apollo-server-express to Apollo Server v3
-// TODO: rewrite auth utils to separate class
-// TODO: improved GraphQL errors
-// TODO: ADD @Unauthorizated
-// https://www.apollographql.com/docs/apollo-server/security/authentication/
-// https://codevoweb.com/react-node-access-refresh-tokens-authentication/
-
 const authChecker: AuthChecker<Context> = function (
   { context: { user } },
   roles,
@@ -48,8 +41,8 @@ function getApolloServerPlugins() {
 async function createApolloServer(schema: GraphQLSchema) {
   const server = new ApolloServer({
     schema,
-    context: (context: Context) => {
-      return Authorization.validate(context);
+    context: async (context: Context) => {
+      return await Authorization.validate(context);
     },
     plugins: [getApolloServerPlugins()],
   });

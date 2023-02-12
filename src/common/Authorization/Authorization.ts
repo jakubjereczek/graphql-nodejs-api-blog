@@ -4,6 +4,7 @@ import Context from 'common/types/Context';
 import { signJwt, verifyJwt } from 'common/utils/jwt';
 import { UserModel, mapUserIntoUserIdentifier } from 'schemas/user.schema';
 import { UserIdentifier } from 'common/types/User';
+import { JwtTokenType } from 'common/types/Jwt';
 
 export const KEY_ACCESS = 'access_token';
 export const KEY_REFRESH = 'refresh_token';
@@ -19,7 +20,10 @@ class Authorization {
     } = context;
 
     if (access_token) {
-      const decoded = Authorization.decodeToken<UserIdentifier>(access_token);
+      const decoded = Authorization.decodeToken<UserIdentifier>(
+        access_token,
+        'access',
+      );
 
       if (decoded) {
         const user = await UserModel.find().findByEmail(decoded.email).lean();
@@ -29,8 +33,10 @@ class Authorization {
           throw new ApolloError('403');
         }
       } else {
-        const decoded =
-          Authorization.decodeToken<UserIdentifier>(refresh_token);
+        const decoded = Authorization.decodeToken<UserIdentifier>(
+          refresh_token,
+          'refresh',
+        );
         if (!decoded) {
           throw new ApolloError('403');
         }
@@ -53,12 +59,12 @@ class Authorization {
     user: UserIdentifier,
     context: Context,
   ): { access_token: string; refresh_token: string } {
-    const accessToken = Authorization.signToken(user, EXP_ACCESS);
+    const accessToken = Authorization.signToken(user, EXP_ACCESS, 'access');
     const accessTokenCookie =
       Authorization.createTokenCookieOptions(EXP_ACCESS);
     context.res.cookie(KEY_ACCESS, accessToken, accessTokenCookie);
 
-    const refreshToken = Authorization.signToken(user, EXP_REFRESH);
+    const refreshToken = Authorization.signToken(user, EXP_REFRESH, 'refresh');
     const refreshTokenCookie =
       Authorization.createTokenCookieOptions(EXP_REFRESH);
     context.res.cookie(KEY_REFRESH, refreshToken, refreshTokenCookie);
@@ -77,14 +83,18 @@ class Authorization {
     return false;
   }
 
-  private static signToken<T extends object>(object: T, expiresIn: number) {
-    return signJwt(object, {
+  private static signToken<T extends object>(
+    object: T,
+    expiresIn: number,
+    type: JwtTokenType,
+  ) {
+    return signJwt(object, type, {
       expiresIn: `${expiresIn}m`,
     });
   }
 
-  private static decodeToken<T>(token: string) {
-    return verifyJwt<T>(token);
+  private static decodeToken<T>(token: string, type: JwtTokenType) {
+    return verifyJwt<T>(token, type);
   }
 
   private static createTokenCookieOptions(expiresIn: number): CookieOptions {
