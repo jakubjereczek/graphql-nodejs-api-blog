@@ -1,4 +1,12 @@
-import { Arg, Authorized, Ctx, Mutation, Query, Resolver } from 'type-graphql';
+import {
+  Arg,
+  Authorized,
+  Ctx,
+  Mutation,
+  Query,
+  Resolver,
+  UseMiddleware,
+} from 'type-graphql';
 import Context from 'common/types/Context';
 import { UserController } from 'controllers/user.controller';
 import {
@@ -7,6 +15,7 @@ import {
   User,
   UserAuthorizationToken,
 } from 'schemas/user.schema';
+import { Unauthorized } from 'common/utils/typegraphql';
 
 @Resolver()
 export default class UserResolver {
@@ -15,11 +24,13 @@ export default class UserResolver {
   }
 
   @Mutation(() => User)
+  @UseMiddleware(Unauthorized)
   createUser(@Arg('input') input: CreateUserInput) {
     return this.userController.createUser(input);
   }
 
   @Mutation(() => UserAuthorizationToken)
+  @UseMiddleware(Unauthorized)
   authorizeUser(
     @Arg('input') input: AuthorizeUserInput,
     @Ctx() context: Context,
@@ -35,6 +46,6 @@ export default class UserResolver {
 
   @Query(() => User, { nullable: true })
   me(@Ctx() context: Context) {
-    return context.user;
+    return this.userController.currentUser(context);
   }
 }

@@ -2,6 +2,7 @@ import { ApolloError } from 'apollo-server';
 import { compare } from 'bcrypt';
 import Authorization from 'common/Authorization/Authorization';
 import Context from 'common/types/Context';
+import { GraphQLError } from 'graphql';
 import {
   AuthorizeUserInput,
   CreateUserInput,
@@ -38,6 +39,20 @@ export class UserController {
   }
 
   async logoutUser(context: Context) {
+    context.user = null;
     return Authorization.clearCookies(context);
+  }
+
+  async currentUser(context: Context) {
+    if (context.user) {
+      const user = await UserModel.find()
+        .findByEmail(context.user.email)
+        .lean();
+      if (!user) {
+        return new GraphQLError('User not found.');
+      }
+
+      return user;
+    }
   }
 }
