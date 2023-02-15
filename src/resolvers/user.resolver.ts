@@ -46,6 +46,6 @@ export default class UserResolver {
 
   @Query(() => User, { nullable: true })
   me(@Ctx() context: Context) {
-    return this.userController.currentUser(context);
+    return this.userController.getCurrentUser(context);
   }
 }

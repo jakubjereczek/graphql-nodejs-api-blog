@@ -2,6 +2,7 @@ import { ApolloError } from 'apollo-server';
 import { compare } from 'bcrypt';
 import Authorization from 'common/Authorization/Authorization';
 import Context from 'common/types/Context';
+import { Role } from 'common/types/Role';
 import { GraphQLError } from 'graphql';
 import {
   AuthorizeUserInput,
@@ -18,7 +19,7 @@ export class UserController {
         'User with this email already exists in the database.',
       );
     }
-    return UserModel.create(input);
+    return UserModel.create({ ...input, roles: [Role.Reader] });
   }
 
   async authorizeUser(input: AuthorizeUserInput, context: Context) {
@@ -43,7 +44,7 @@ export class UserController {
     return Authorization.clearCookies(context);
   }
 
-  async currentUser(context: Context) {
+  async getCurrentUser(context: Context) {
     if (context.user) {
       const user = await UserModel.find()
         .findByEmail(context.user.email)
