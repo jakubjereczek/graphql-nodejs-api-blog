@@ -7,7 +7,9 @@
     "start": "ts-node -r tsconfig-paths/register src/index.ts",
     "dev": "ts-node-dev -r tsconfig-paths/register --respawn --transpile-only src/index.ts",
     "test": "npx jest",
-    "lint": "eslint . --ext .ts --ext .mts"
+    "lint": "eslint . --ext .ts --ext .mts",
+    "prettier": "prettier --write .",
+    "prepare": "husky install"
   },
   "author": "",
   "license": "ISC",
@@ -37,6 +39,8 @@
     "@typescript-eslint/parser": "^5.50.0",
     "eslint": "^8.33.0",
     "eslint-config-prettier": "^8.6.0",
+    "husky": "^8.0.0",
+    "lint-staged": "^13.1.2",
     "prettier": "2.8.3",
     "ts-jest": "^29.0.5",
     "ts-node-dev": "^2.0.0",
