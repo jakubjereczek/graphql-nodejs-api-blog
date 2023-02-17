@@ -1,18 +1,17 @@
-import { ApolloError } from 'apollo-server';
+import { GraphQLError } from 'graphql';
 import {
   CategoryModel,
   CreateCategoryInput,
   GetOrDeleteCategoryInput,
   UpdateCategoryInput,
 } from 'schemas/category.schema';
+import { ERROR_MESSAGE } from 'common/utils/error';
 
 export class CategoryController {
   async createCategory(input: CreateCategoryInput) {
     const category = await CategoryModel.find().findByName(input.name).lean();
     if (category) {
-      throw new ApolloError(
-        'Category with this name already exists in the database.',
-      );
+      throw new GraphQLError(ERROR_MESSAGE.CATEGORY_ALREADY_EXIST);
     }
     return CategoryModel.create(input);
   }
@@ -35,9 +34,7 @@ export class CategoryController {
     );
 
     if (result.modifiedCount === 0) {
-      throw new ApolloError(
-        'Category with this name does not exist in the database.',
-      );
+      throw new GraphQLError(ERROR_MESSAGE.CATEGORY_NOT_EXIST);
     }
 
     return result;
@@ -49,9 +46,7 @@ export class CategoryController {
     });
 
     if (result.deletedCount === 0) {
-      throw new ApolloError(
-        'Category with this name does not exist in the database.',
-      );
+      throw new GraphQLError(ERROR_MESSAGE.CATEGORY_NOT_EXIST);
     }
 
     return result;

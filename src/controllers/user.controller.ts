@@ -1,23 +1,21 @@
-import { ApolloError } from 'apollo-server';
+import { GraphQLError } from 'graphql';
 import { compare } from 'bcrypt';
 import Authorization from 'common/Authorization/Authorization';
 import Context from 'common/types/Context';
 import { Role } from 'common/types/Role';
-import { GraphQLError } from 'graphql';
 import {
   AuthorizeUserInput,
   CreateUserInput,
   UserModel,
   mapUserIntoUserIdentifier,
 } from 'schemas/user.schema';
+import { ERROR_MESSAGE } from 'common/utils/error';
 
 export class UserController {
   async createUser(input: CreateUserInput) {
     const user = await UserModel.find().findByEmail(input.email).lean();
     if (user) {
-      throw new ApolloError(
-        'User with this email already exists in the database.',
-      );
+      throw new GraphQLError(ERROR_MESSAGE.USER_ALREADY_EXIST);
     }
     return UserModel.create({ ...input, roles: [Role.Reader] });
   }
@@ -25,12 +23,12 @@ export class UserController {
   async authorizeUser(input: AuthorizeUserInput, context: Context) {
     const user = await UserModel.find().findByEmail(input.email).lean();
     if (!user) {
-      throw new ApolloError('Invalid email or password.');
+      throw new GraphQLError(ERROR_MESSAGE.USER_INVALID_AUTHORIZATION);
     }
 
     const password = await compare(input.password, user.password);
     if (!password) {
-      throw new ApolloError('Invalid email or password.');
+      throw new GraphQLError(ERROR_MESSAGE.USER_INVALID_AUTHORIZATION);
     }
 
     return Authorization.signAndSetAuthorizationTokens(
@@ -50,7 +48,7 @@ export class UserController {
         .findByEmail(context.user.email)
         .lean();
       if (!user) {
-        return new GraphQLError('User not found.');
+        throw new GraphQLError(ERROR_MESSAGE.USER_NOT_EXIST);
       }
 
       return user;

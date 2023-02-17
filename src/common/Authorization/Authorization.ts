@@ -5,6 +5,7 @@ import { signJwt, verifyJwt } from 'common/utils/jwt';
 import { UserModel, mapUserIntoUserIdentifier } from 'schemas/user.schema';
 import { UserIdentifier } from 'common/types/User';
 import { JwtTokenType } from 'common/types/Jwt';
+import { ERROR_MESSAGE } from 'common/utils/error';
 
 export const KEY_ACCESS = 'access_token';
 export const KEY_REFRESH = 'refresh_token';
@@ -30,7 +31,7 @@ class Authorization {
         if (user) {
           context.user = mapUserIntoUserIdentifier(user);
         } else {
-          throw new ApolloError('403');
+          throw new ApolloError(ERROR_MESSAGE.UNAUTHORIZED);
         }
       } else {
         const decoded = Authorization.decodeToken<UserIdentifier>(
@@ -38,12 +39,12 @@ class Authorization {
           'refresh',
         );
         if (!decoded) {
-          throw new ApolloError('403');
+          throw new ApolloError(ERROR_MESSAGE.UNAUTHORIZED);
         }
 
         const user = await UserModel.find().findByEmail(decoded.email).lean();
         if (!user) {
-          throw new ApolloError('403');
+          throw new ApolloError(ERROR_MESSAGE.UNAUTHORIZED);
         }
 
         Authorization.signAndSetAuthorizationTokens(
