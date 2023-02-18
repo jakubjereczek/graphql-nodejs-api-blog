@@ -1,4 +1,3 @@
-import { GraphQLError } from 'graphql';
 import { compare } from 'bcrypt';
 import Authorization from 'common/Authorization/Authorization';
 import Context from 'common/types/Context';
@@ -9,13 +8,16 @@ import {
   UserModel,
   mapUserIntoUserIdentifier,
 } from 'schemas/user.schema';
-import { ERROR_MESSAGE } from 'common/utils/error';
+import { ERROR_CODE, ERROR_MESSAGE, GraphQLError } from 'common/utils/error';
 
 export class UserController {
   async createUser(input: CreateUserInput) {
     const user = await UserModel.find().findByEmail(input.email).lean();
     if (user) {
-      throw new GraphQLError(ERROR_MESSAGE.USER_ALREADY_EXIST);
+      throw new GraphQLError(ERROR_MESSAGE.USER_ALREADY_EXIST, {
+        code: ERROR_CODE.CONFLICT,
+        statusCode: 409,
+      });
     }
     return UserModel.create({ ...input, roles: [Role.Reader] });
   }
@@ -23,7 +25,10 @@ export class UserController {
   async authorizeUser(input: AuthorizeUserInput, context: Context) {
     const user = await UserModel.find().findByEmail(input.email).lean();
     if (!user) {
-      throw new GraphQLError(ERROR_MESSAGE.USER_INVALID_AUTHORIZATION);
+      throw new GraphQLError(ERROR_MESSAGE.UNAUTHORIZED, {
+        code: ERROR_CODE.UNAUTHORIZED,
+        statusCode: 401,
+      });
     }
 
     const password = await compare(input.password, user.password);
@@ -48,7 +53,10 @@ export class UserController {
         .findByEmail(context.user.email)
         .lean();
       if (!user) {
-        throw new GraphQLError(ERROR_MESSAGE.USER_NOT_EXIST);
+        throw new GraphQLError(ERROR_MESSAGE.USER_NOT_EXIST, {
+          code: ERROR_CODE.BAD_USER_INPUT,
+          statusCode: 400,
+        });
       }
 
       return user;

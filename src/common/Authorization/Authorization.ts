@@ -5,7 +5,7 @@ import { signJwt, verifyJwt } from 'common/utils/jwt';
 import { UserModel, mapUserIntoUserIdentifier } from 'schemas/user.schema';
 import { UserIdentifier } from 'common/types/User';
 import { JwtTokenType } from 'common/types/Jwt';
-import { ERROR_MESSAGE } from 'common/utils/error';
+import { ERROR_CODE, ERROR_MESSAGE } from 'common/utils/error';
 
 export const KEY_ACCESS = 'access_token';
 export const KEY_REFRESH = 'refresh_token';
@@ -31,7 +31,13 @@ class Authorization {
         if (user) {
           context.user = mapUserIntoUserIdentifier(user);
         } else {
-          throw new ApolloError(ERROR_MESSAGE.UNAUTHORIZED);
+          throw new ApolloError(
+            ERROR_MESSAGE.UNAUTHORIZED,
+            ERROR_CODE.UNAUTHORIZED,
+            {
+              statusCode: 401,
+            },
+          );
         }
       } else {
         const decoded = Authorization.decodeToken<UserIdentifier>(
@@ -39,12 +45,24 @@ class Authorization {
           'refresh',
         );
         if (!decoded) {
-          throw new ApolloError(ERROR_MESSAGE.UNAUTHORIZED);
+          throw new ApolloError(
+            ERROR_MESSAGE.UNAUTHORIZED,
+            ERROR_CODE.UNAUTHORIZED,
+            {
+              statusCode: 401,
+            },
+          );
         }
 
         const user = await UserModel.find().findByEmail(decoded.email).lean();
         if (!user) {
-          throw new ApolloError(ERROR_MESSAGE.UNAUTHORIZED);
+          throw new ApolloError(
+            ERROR_MESSAGE.UNAUTHORIZED,
+            ERROR_CODE.UNAUTHORIZED,
+            {
+              statusCode: 401,
+            },
+          );
         }
 
         Authorization.signAndSetAuthorizationTokens(

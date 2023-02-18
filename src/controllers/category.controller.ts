@@ -1,17 +1,19 @@
-import { GraphQLError } from 'graphql';
 import {
   CategoryModel,
   CreateCategoryInput,
   GetOrDeleteCategoryInput,
   UpdateCategoryInput,
 } from 'schemas/category.schema';
-import { ERROR_MESSAGE } from 'common/utils/error';
+import { ERROR_CODE, ERROR_MESSAGE, GraphQLError } from 'common/utils/error';
 
 export class CategoryController {
   async createCategory(input: CreateCategoryInput) {
     const category = await CategoryModel.find().findByName(input.name).lean();
     if (category) {
-      throw new GraphQLError(ERROR_MESSAGE.CATEGORY_ALREADY_EXIST);
+      throw new GraphQLError(ERROR_MESSAGE.CATEGORY_ALREADY_EXIST, {
+        code: ERROR_CODE.CONFLICT,
+        statusCode: 409,
+      });
     }
     return CategoryModel.create(input);
   }
@@ -34,7 +36,10 @@ export class CategoryController {
     );
 
     if (result.modifiedCount === 0) {
-      throw new GraphQLError(ERROR_MESSAGE.CATEGORY_NOT_EXIST);
+      throw new GraphQLError(ERROR_MESSAGE.CATEGORY_NOT_EXIST, {
+        code: ERROR_CODE.BAD_USER_INPUT,
+        statusCode: 400,
+      });
     }
 
     return result;
@@ -46,7 +51,10 @@ export class CategoryController {
     });
 
     if (result.deletedCount === 0) {
-      throw new GraphQLError(ERROR_MESSAGE.CATEGORY_NOT_EXIST);
+      throw new GraphQLError(ERROR_MESSAGE.CATEGORY_NOT_EXIST, {
+        code: ERROR_CODE.BAD_USER_INPUT,
+        statusCode: 400,
+      });
     }
 
     return result;
