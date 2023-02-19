@@ -1,4 +1,5 @@
 import express from 'express';
+import config from 'config';
 import { AuthChecker, buildSchema } from 'type-graphql';
 import { ApolloServer } from 'apollo-server-express';
 import { GraphQLSchema } from 'graphql';
@@ -11,6 +12,9 @@ import {
 } from 'apollo-server-core';
 import { connectToMongo } from 'common/utils/mongo';
 import Authorization from 'common/Authorization/Authorization';
+import { UserModel } from 'schemas/user.schema';
+import { UserConfig } from 'common/types/User';
+import { Role } from 'common/types/Role';
 
 const authChecker: AuthChecker<Context> = function (
   { context: { user } },
@@ -26,7 +30,7 @@ const authChecker: AuthChecker<Context> = function (
     return false;
   }
 
-  if (user.roles.some((role) => role.includes(role))) {
+  if (user.roles.some((role) => roles.includes(role))) {
     return true;
   }
   return false;
@@ -49,6 +53,20 @@ async function createApolloServer(schema: GraphQLSchema) {
   return server;
 }
 
+export async function createRootUserIfNotExists() {
+  const root = config.get<UserConfig>('root');
+  const user = await UserModel.find().findByEmail(root.email).lean();
+
+  if (!user) {
+    try {
+      UserModel.create({ ...root, roles: [Role.Moderator] });
+      console.debug('Created a default root user account with moderator role.');
+    } catch (err) {
+      console.error('Failed to create a default root user account.', err);
+    }
+  }
+}
+
 export async function bootstrap() {
   const app = express();
   app.use(cookieParser());
@@ -67,7 +85,7 @@ export async function bootstrap() {
     },
     () => {
       if (process.env.NODE_ENV === 'development') {
-        console.log(
+        console.debug(
           'Server is running, GraphQL Playground available at http://localhost:4000/graphql',
         );
       }
@@ -75,4 +93,5 @@ export async function bootstrap() {
   );
 
   connectToMongo();
+  createRootUserIfNotExists();
 }

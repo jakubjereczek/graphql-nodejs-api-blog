@@ -37,7 +37,7 @@ export default class CategoryResolver {
     return this.categoryController.updateCategory(input);
   }
 
-  @Mutation(() => Category)
+  @Mutation(() => Boolean)
   @Authorized([Role.Moderator])
   deleteCategory(@Arg('input') input: GetOrDeleteCategoryInput) {
     return this.categoryController.deleteCategory(input);

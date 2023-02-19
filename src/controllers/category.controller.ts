@@ -27,28 +27,32 @@ export class CategoryController {
   }
 
   async updateCategory(input: UpdateCategoryInput) {
-    const result = await CategoryModel.updateOne(
+    const updateResult = await CategoryModel.updateOne(
       { name: input.name },
       {
         ...input,
         name: input.newName,
       },
-    );
+    ).lean();
 
-    if (result.modifiedCount === 0) {
+    if (updateResult.modifiedCount === 0) {
       throw new GraphQLError(ERROR_MESSAGE.CATEGORY_NOT_EXIST, {
         code: ERROR_CODE.BAD_USER_INPUT,
         statusCode: 400,
       });
     }
 
-    return result;
+    const modifiedCategory = await CategoryModel.find()
+      .findByName(input.newName)
+      .lean();
+
+    return modifiedCategory;
   }
 
   async deleteCategory(input: GetOrDeleteCategoryInput) {
     const result = await CategoryModel.deleteOne({
       name: input.name,
-    });
+    }).lean();
 
     if (result.deletedCount === 0) {
       throw new GraphQLError(ERROR_MESSAGE.CATEGORY_NOT_EXIST, {
@@ -57,6 +61,6 @@ export class CategoryController {
       });
     }
 
-    return result;
+    return result.deletedCount === 1;
   }
 }

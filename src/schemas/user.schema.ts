@@ -6,10 +6,10 @@ import {
   queryMethod,
 } from '@typegoose/typegoose';
 import { AsQueryMethod, ReturnModelType } from '@typegoose/typegoose/lib/types';
+import { Field, InputType, ObjectType } from 'type-graphql';
 import { IsEmail, MaxLength, MinLength } from 'class-validator';
 import { UserIdentifier } from 'common/types/User';
 import { hash } from 'common/utils/hash';
-import { Field, InputType, ObjectType } from 'type-graphql';
 
 interface QueryHelper {
   findByEmail: AsQueryMethod<typeof findByEmail>;
@@ -40,7 +40,7 @@ export class User {
   name: string;
 
   @Field(() => String)
-  @prop({ required: true })
+  @prop({ required: true, unique: true })
   email: string;
 
   @Field(() => String)
@@ -48,6 +48,7 @@ export class User {
   password: string;
 
   @Field(() => [String])
+  @prop({ required: true })
   roles: string[];
 }
 

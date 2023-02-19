@@ -7,6 +7,7 @@ import {
   CreateUserInput,
   UserModel,
   mapUserIntoUserIdentifier,
+  User,
 } from 'schemas/user.schema';
 import { ERROR_CODE, ERROR_MESSAGE, GraphQLError } from 'common/utils/error';
 
@@ -19,7 +20,8 @@ export class UserController {
         statusCode: 409,
       });
     }
-    return UserModel.create({ ...input, roles: [Role.Reader] });
+    const payload: Partial<User> = { ...input, roles: [Role.Reader] };
+    return UserModel.create(payload);
   }
 
   async authorizeUser(input: AuthorizeUserInput, context: Context) {

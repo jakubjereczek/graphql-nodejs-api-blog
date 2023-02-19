@@ -11,11 +11,12 @@ export const ERROR_MESSAGE = {
   CATEGORY_NOT_EXIST: 'Category with this name does not exist in the database.',
   USER_ALREADY_EXIST: 'User with this email already exists in the database.',
   USER_NOT_EXIST: 'User with this email does not exist in the database.',
-  USER_INVALID_AUTHORIZATION: 'Invalid email or password',
+  USER_INVALID_AUTHORIZATION: 'Invalid email or password.',
 };
 
 export enum ERROR_CODE {
   UNAUTHORIZED = 'UNAUTHORIZED_ERROR',
+  ONLY_UNAUTHORIZED = 'ONLY_UNAUTHORIZED_ERROR',
   INTERNAL_SERVER = 'INTERNAL_SERVER_ERROR',
   BAD_USER_INPUT = 'BAD_USER_INPUT_ERROR',
   CONFLICT = 'CONFLICT_ERROR',

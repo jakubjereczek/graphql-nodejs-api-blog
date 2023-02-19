@@ -1,4 +1,4 @@
-import { getModelForClass, prop } from '@typegoose/typegoose';
+import { getModelForClass, prop, queryMethod } from '@typegoose/typegoose';
 import { AsQueryMethod, ReturnModelType } from '@typegoose/typegoose/lib/types';
 import { IsOptional, MaxLength, MinLength } from 'class-validator';
 import { Field, InputType, ObjectType } from 'type-graphql';
@@ -14,16 +14,18 @@ function findByName(
   return this.findOne({ name });
 }
 
+@queryMethod(findByName)
 @ObjectType()
 export class Category {
   @Field(() => String)
   _id: string;
 
   @Field(() => String)
-  @prop({ required: true })
+  @prop({ required: true, unique: true })
   name: string;
 
   @Field(() => String)
+  @prop({ required: true })
   description: string;
 }
 
@@ -33,7 +35,7 @@ export const CategoryModel = getModelForClass<typeof Category, QueryHelper>(
 
 @InputType()
 export class CreateCategoryInput {
-  @MinLength(6, {
+  @MinLength(4, {
     message: 'Category must have at least 4 chars length.',
   })
   @MaxLength(32, {
@@ -49,7 +51,7 @@ export class CreateCategoryInput {
 
 @InputType()
 export class GetOrDeleteCategoryInput {
-  @MinLength(6, {
+  @MinLength(4, {
     message: 'Category must have at least 4 chars length.',
   })
   @MaxLength(32, {
@@ -61,7 +63,7 @@ export class GetOrDeleteCategoryInput {
 
 @InputType()
 export class UpdateCategoryInput {
-  @MinLength(6, {
+  @MinLength(4, {
     message: 'Category must have at least 4 chars length.',
   })
   @MaxLength(32, {
@@ -73,7 +75,7 @@ export class UpdateCategoryInput {
   @Field(() => String)
   newName: string;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   @IsOptional()
-  description: string;
+  description?: string;
 }
