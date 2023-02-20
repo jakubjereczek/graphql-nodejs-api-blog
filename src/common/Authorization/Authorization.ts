@@ -27,50 +27,55 @@ class Authorization {
       );
 
       if (decoded) {
-        const user = await UserModel.find().findByEmail(decoded.email).lean();
-        if (user) {
-          context.user = mapUserIntoUserIdentifier(user);
-        } else {
-          throw new ApolloError(
-            ERROR_MESSAGE.UNAUTHORIZED,
-            ERROR_CODE.UNAUTHORIZED,
-            {
-              statusCode: 401,
-            },
-          );
-        }
-      } else {
-        const decoded = Authorization.decodeToken<UserIdentifier>(
-          refresh_token,
-          'refresh',
-        );
-        if (!decoded) {
-          throw new ApolloError(
-            ERROR_MESSAGE.UNAUTHORIZED,
-            ERROR_CODE.UNAUTHORIZED,
-            {
-              statusCode: 401,
-            },
-          );
-        }
+        if (!context.user) {
+          const user = await UserModel.find().findByEmail(decoded.email).lean();
 
-        const user = await UserModel.find().findByEmail(decoded.email).lean();
-        if (!user) {
-          throw new ApolloError(
-            ERROR_MESSAGE.UNAUTHORIZED,
-            ERROR_CODE.UNAUTHORIZED,
-            {
-              statusCode: 401,
-            },
-          );
+          if (user) {
+            context.user = mapUserIntoUserIdentifier(user);
+          } else {
+            throw new ApolloError(
+              ERROR_MESSAGE.UNAUTHORIZED,
+              ERROR_CODE.UNAUTHORIZED,
+              {
+                statusCode: 401,
+              },
+            );
+          }
         }
-
-        Authorization.signAndSetAuthorizationTokens(
-          mapUserIntoUserIdentifier(user),
-          context,
+      }
+    } else if (refresh_token) {
+      const decoded = Authorization.decodeToken<UserIdentifier>(
+        refresh_token,
+        'refresh',
+      );
+      if (!decoded) {
+        throw new ApolloError(
+          ERROR_MESSAGE.UNAUTHORIZED,
+          ERROR_CODE.UNAUTHORIZED,
+          {
+            statusCode: 401,
+          },
         );
       }
+
+      const user = await UserModel.find().findByEmail(decoded.email).lean();
+      if (!user) {
+        throw new ApolloError(
+          ERROR_MESSAGE.UNAUTHORIZED,
+          ERROR_CODE.UNAUTHORIZED,
+          {
+            statusCode: 401,
+          },
+        );
+      }
+
+      Authorization.signAndSetAuthorizationTokens(
+        mapUserIntoUserIdentifier(user),
+        context,
+      );
+      context.user = mapUserIntoUserIdentifier(user);
     }
+
     return context;
   }
 
