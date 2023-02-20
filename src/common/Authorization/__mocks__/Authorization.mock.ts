@@ -1,4 +1,5 @@
 import Context from 'common/types/Context';
+import { Role } from 'common/types/Role';
 import { UserIdentifier } from 'common/types/User';
 
 export const mockedTokens = {
@@ -6,20 +7,21 @@ export const mockedTokens = {
   refresh_token: 'refresh_token',
 };
 
-export const mockedContext = {
-  res: {
-    cookie: jest.fn(),
-  },
-  req: {
-    cookies: {
-      ...mockedTokens,
+export const mockContext = (cookies: any) =>
+  ({
+    res: {
+      cookie: jest.fn(),
     },
-  },
-  user: null,
-} as unknown as Context;
+    req: {
+      cookies: {
+        ...cookies,
+      },
+    },
+    user: null,
+  } as unknown as Context);
 
 export const mockedUser: UserIdentifier = {
   _id: 'user.id',
   email: 'user.email',
-  roles: [],
+  roles: [Role.Writer],
 };

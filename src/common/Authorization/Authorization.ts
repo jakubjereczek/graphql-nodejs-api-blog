@@ -52,13 +52,7 @@ class Authorization {
         if (user) {
           context.user = mapUserIntoUserIdentifier(user);
         } else {
-          throw new ApolloError(
-            ERROR_MESSAGE.UNAUTHORIZED,
-            ERROR_CODE.UNAUTHORIZED,
-            {
-              statusCode: 401,
-            },
-          );
+          throw new Error('User does not exists in database.');
         }
       }
     } else {

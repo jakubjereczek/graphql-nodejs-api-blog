@@ -6,7 +6,7 @@ import Authorization, {
 import { signJwt, verifyJwt } from 'common/utils/jwt';
 import { UserModel } from 'schemas/user.schema';
 import {
-  mockedContext,
+  mockContext,
   mockedTokens,
   mockedUser,
 } from '../__mocks__/Authorization.mock';
@@ -29,6 +29,8 @@ jest.mock('schemas/user.schema', () => ({
 
 jest.mock('apollo-server');
 
+const mockedContext = mockContext(mockedTokens);
+
 describe('Authorization tests', () => {
   describe('validate method', () => {
     it('should call the signJwt function with the access_token if it is present in the request cookies.', async () => {
@@ -46,7 +48,7 @@ describe('Authorization tests', () => {
     });
 
     it('should update the context user if the access_token is successfully decoded', async () => {
-      (verifyJwt as jest.Mock).mockImplementation(() => mockedUser);
+      const mockedContext = mockContext(mockedTokens);
       (
         UserModel.find().findByEmail(mockedUser.email)
           .lean as unknown as jest.Mock
@@ -85,6 +87,10 @@ describe('Authorization tests', () => {
     });
 
     it('should throw an ApolloError when tried to decode the refresh_token and wasnt valid', () => {
+      const mockedContext = mockContext({
+        ...mockedTokens,
+        access_token: undefined,
+      });
       (verifyJwt as jest.Mock)
         .mockImplementationOnce(() => null)
         .mockImplementationOnce(() => null);
@@ -99,6 +105,10 @@ describe('Authorization tests', () => {
     });
 
     it('should throw an ApolloError if a user cant be found in the database when tried to refresh tokens.', () => {
+      const mockedContext = mockContext({
+        ...mockedTokens,
+        access_token: undefined,
+      });
       (verifyJwt as jest.Mock)
         .mockImplementationOnce(() => null)
         .mockImplementationOnce(() => mockedUser);
