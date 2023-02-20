@@ -20,63 +20,75 @@ class Authorization {
       },
     } = context;
 
-    if (access_token) {
-      const decoded = Authorization.decodeToken<UserIdentifier>(
-        access_token,
-        'access',
-      );
-
-      if (decoded) {
-        if (!context.user) {
-          const user = await UserModel.find().findByEmail(decoded.email).lean();
-
-          if (user) {
-            context.user = mapUserIntoUserIdentifier(user);
-          } else {
-            throw new ApolloError(
-              ERROR_MESSAGE.UNAUTHORIZED,
-              ERROR_CODE.UNAUTHORIZED,
-              {
-                statusCode: 401,
-              },
-            );
-          }
-        }
+    try {
+      if (access_token) {
+        await this.validateAccessToken(context);
+      } else if (refresh_token) {
+        await this.refreshTokens(context);
       }
-    } else if (refresh_token) {
-      const decoded = Authorization.decodeToken<UserIdentifier>(
-        refresh_token,
-        'refresh',
+    } catch (err) {
+      throw new ApolloError(
+        ERROR_MESSAGE.UNAUTHORIZED,
+        ERROR_CODE.UNAUTHORIZED,
+        {
+          statusCode: 401,
+        },
       );
-      if (!decoded) {
-        throw new ApolloError(
-          ERROR_MESSAGE.UNAUTHORIZED,
-          ERROR_CODE.UNAUTHORIZED,
-          {
-            statusCode: 401,
-          },
-        );
-      }
-
-      const user = await UserModel.find().findByEmail(decoded.email).lean();
-      if (!user) {
-        throw new ApolloError(
-          ERROR_MESSAGE.UNAUTHORIZED,
-          ERROR_CODE.UNAUTHORIZED,
-          {
-            statusCode: 401,
-          },
-        );
-      }
-
-      Authorization.signAndSetAuthorizationTokens(
-        mapUserIntoUserIdentifier(user),
-        context,
-      );
-      context.user = mapUserIntoUserIdentifier(user);
     }
 
     return context;
+  }
+
+  private static async validateAccessToken(context: Context) {
+    const decoded = Authorization.decodeToken<UserIdentifier>(
+      context.req.cookies.access_token,
+      'access',
+    );
+
+    if (decoded) {
+      if (!context.user) {
+        const user = await UserModel.find().findByEmail(decoded.email).lean();
+
+        if (user) {
+          context.user = mapUserIntoUserIdentifier(user);
+        } else {
+          throw new ApolloError(
+            ERROR_MESSAGE.UNAUTHORIZED,
+            ERROR_CODE.UNAUTHORIZED,
+            {
+              statusCode: 401,
+            },
+          );
+        }
+      }
+    } else {
+      Authorization.refreshTokens(context);
+    }
+
+    return context;
+  }
+
+  private static async refreshTokens(context: Context) {
+    if (context.req.cookies.refresh_token) {
+      const decoded = Authorization.decodeToken<UserIdentifier>(
+        context.req.cookies.refresh_token,
+        'refresh',
+      );
+      if (!decoded) {
+        throw new Error('Refresh token is not valid.');
+      }
+
+      const user = await UserModel.find().findByEmail(decoded.email).lean();
+      if (user) {
+        Authorization.signAndSetAuthorizationTokens(
+          mapUserIntoUserIdentifier(user),
+          context,
+        );
+        context.user = mapUserIntoUserIdentifier(user);
+      } else {
+        throw new Error('User does not exist in database.');
+      }
+    }
   }
 
   public static signAndSetAuthorizationTokens(
