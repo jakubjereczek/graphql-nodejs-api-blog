@@ -18,3 +18,12 @@ export const Unauthorized: MiddlewareFn<Context> = async (
   }
   return next();
 };
+
+export const IncreaseArticleViews: MiddlewareFn<Context> = async (
+  { root, args, context, info },
+  next,
+) => {
+  // TODO: Implement logic for increase article views.
+
+  return next();
+};
