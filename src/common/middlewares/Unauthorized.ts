@@ -3,7 +3,7 @@ import { ApolloError } from 'apollo-server';
 import Context from 'common/types/Context';
 import { ERROR_CODE, ERROR_MESSAGE } from 'common/utils/error';
 
-export const Unauthorized: MiddlewareFn<Context> = async (
+const Unauthorized: MiddlewareFn<Context> = async (
   { context: { user } },
   next,
 ) => {
@@ -19,11 +19,4 @@ export const Unauthorized: MiddlewareFn<Context> = async (
   return next();
 };
 
-export const IncreaseArticleViews: MiddlewareFn<Context> = async (
-  { root, args, context, info },
-  next,
-) => {
-  // TODO: Implement logic for increase article views.
-
-  return next();
-};
+export default Unauthorized;

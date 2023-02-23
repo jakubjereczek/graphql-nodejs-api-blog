@@ -4,12 +4,12 @@ import { AuthChecker, buildSchema } from 'type-graphql';
 import { ApolloServer } from 'apollo-server-express';
 import { GraphQLSchema } from 'graphql';
 import cookieParser from 'cookie-parser';
-import Context from 'common/types/Context';
-import { resolvers } from 'resolvers';
 import {
   ApolloServerPluginLandingPageGraphQLPlayground,
   ApolloServerPluginLandingPageProductionDefault,
 } from 'apollo-server-core';
+import Context from 'common/types/Context';
+import { resolvers } from 'resolvers';
 import { connectToMongo } from 'common/utils/mongo';
 import Authorization from 'common/Authorization/Authorization';
 import { UserModel } from 'schemas/user.schema';

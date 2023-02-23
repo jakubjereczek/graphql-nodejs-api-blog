@@ -1,6 +1,6 @@
-import ArticleResolver from './article.resolver';
-import CategoryResolver from './category.resolver';
-import UserResolver from './user.resolver';
+import ArticleResolver from 'resolvers/article.resolver';
+import CategoryResolver from 'resolvers/category.resolver';
+import UserResolver from 'resolvers/user.resolver';
 
 export const resolvers = [
   UserResolver,

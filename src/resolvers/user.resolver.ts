@@ -15,7 +15,7 @@ import {
   User,
   UserAuthorizationToken,
 } from 'schemas/user.schema';
-import { Unauthorized } from 'common/utils/typegraphql';
+import Unauthorized from 'common/middlewares/Unauthorized';
 
 @Resolver()
 export default class UserResolver {

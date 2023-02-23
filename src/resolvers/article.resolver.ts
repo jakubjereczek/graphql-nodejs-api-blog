@@ -1,6 +1,7 @@
 import {
   Arg,
   Authorized,
+  Ctx,
   Mutation,
   Query,
   Resolver,
@@ -14,7 +15,8 @@ import {
   GetOrDeleteArticleInput,
   UpdateArticleInput,
 } from 'schemas/article.schema';
-import { IncreaseArticleViews } from 'common/utils/typegraphql';
+import IncreaseArticleViews from 'common/middlewares/IncreaseArticleViews';
+import Context from 'common/types/Context';
 
 @Resolver()
 export default class ArticleResolver {
@@ -24,8 +26,11 @@ export default class ArticleResolver {
 
   @Mutation(() => Article)
   @Authorized([Role.Moderator, Role.Writer])
-  createArticle(@Arg('input') input: CreateArticleInput) {
-    return this.articleController.createArticle(input);
+  createArticle(
+    @Arg('input') input: CreateArticleInput,
+    @Ctx() context: Context,
+  ) {
+    return this.articleController.createArticle(input, context);
   }
 
   @UseMiddleware(IncreaseArticleViews)
