@@ -24,7 +24,11 @@ export class Article {
   _id: string;
 
   @Field(() => String)
-  @prop({ required: true, default: () => `article_${nanoid(6)}`, unique: true })
+  @prop({
+    required: true,
+    default: () => `article_${nanoid(6)()}`,
+    unique: true,
+  })
   article_id: string;
 
   @Field(() => String)
