@@ -1,13 +1,19 @@
-import { getModelForClass, index, prop, Ref } from '@typegoose/typegoose';
+import {
+  getModelForClass,
+  index,
+  prop,
+  Ref,
+  queryMethod,
+} from '@typegoose/typegoose';
 import { AsQueryMethod, ReturnModelType } from '@typegoose/typegoose/lib/types';
+import { Length, MaxLength, MinLength } from 'class-validator';
 import { Field, InputType, ObjectType } from 'type-graphql';
 import { nanoid } from 'common/utils/string';
 import { Category } from 'schemas/category.schema';
 import { User } from 'schemas/user.schema';
-import { IsOptional } from 'class-validator';
 
 interface QueryHelper {
-  findById: AsQueryMethod<typeof findByArticleId>;
+  findByArticleId: AsQueryMethod<typeof findByArticleId>;
 }
 
 function findByArticleId(
@@ -18,6 +24,7 @@ function findByArticleId(
 }
 
 @index({ article_id: 1 })
+@queryMethod(findByArticleId)
 @ObjectType()
 export class Article {
   @Field(() => String)
@@ -68,6 +75,12 @@ export const ArticleModel = getModelForClass<typeof Article, QueryHelper>(
 
 @InputType()
 export class CreateArticleInput {
+  @MinLength(4, {
+    message: 'Category must have at least 4 chars length.',
+  })
+  @MaxLength(32, {
+    message: 'Category should not be longer than 32 chars.',
+  })
   @Field(() => String)
   category: string; // category name
 
@@ -78,20 +91,26 @@ export class CreateArticleInput {
   body: string;
 
   @Field(() => String)
-  @IsOptional()
-  thumbnailUrl?: string;
+  thumbnailUrl: string;
 }
 
 @InputType()
 export class GetOrDeleteArticleInput {
   @Field(() => String)
+  @Length(14)
   articleId: string;
 }
 
 @InputType()
 export class UpdateArticleInput {
+  @MinLength(4, {
+    message: 'Category must have at least 4 chars length.',
+  })
+  @MaxLength(32, {
+    message: 'Category should not be longer than 32 chars.',
+  })
   @Field(() => String)
-  category: Category;
+  category: string; // category name
 
   @Field(() => String)
   name: string;

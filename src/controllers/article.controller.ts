@@ -40,11 +40,11 @@ export class ArticleController {
   }
 
   async getArticle(input: GetOrDeleteArticleInput) {
-    // TODO
+    return await ArticleModel.find().findByArticleId(input.articleId).lean();
   }
 
   async getArticles() {
-    // TODO
+    return await ArticleModel.find().lean();
   }
 
   async updateArticle(input: UpdateArticleInput) {
