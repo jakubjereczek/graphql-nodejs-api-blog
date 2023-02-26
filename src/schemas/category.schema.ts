@@ -35,16 +35,10 @@ export const CategoryModel = getModelForClass<typeof Category, QueryHelper>(
 
 @InputType()
 export class CreateCategoryInput {
-  @MinLength(4, {
-    message: 'Category must have at least 4 chars length.',
-  })
-  @MaxLength(32, {
-    message: 'Category should not be longer than 32 chars.',
-  })
   @Field(() => String)
   name: string;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   @IsOptional()
   description: string;
 }

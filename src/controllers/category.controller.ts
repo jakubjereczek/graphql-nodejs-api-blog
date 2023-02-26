@@ -5,6 +5,7 @@ import {
   UpdateCategoryInput,
 } from 'schemas/category.schema';
 import { ERROR_CODE, ERROR_MESSAGE, GraphQLError } from 'common/utils/error';
+import { ArticleModel } from 'schemas/article.schema';
 
 export class CategoryController {
   async createCategory(input: CreateCategoryInput) {
@@ -50,6 +51,22 @@ export class CategoryController {
   }
 
   async deleteCategory(input: GetOrDeleteCategoryInput) {
+    const category = await CategoryModel.find().findByName(input.name).lean();
+    if (!category) {
+      throw new GraphQLError(ERROR_MESSAGE.CATEGORY_NOT_EXIST, {
+        code: ERROR_CODE.CONFLICT,
+        statusCode: 400,
+      });
+    }
+
+    const articles = await ArticleModel.find({ category: category._id }).lean();
+    if (articles.length > 0) {
+      throw new GraphQLError(ERROR_MESSAGE.CATEGORY_HAS_ARTICLES, {
+        code: ERROR_CODE.CONFLICT,
+        statusCode: 409,
+      });
+    }
+
     const result = await CategoryModel.deleteOne({
       name: input.name,
     }).lean();

@@ -6,7 +6,7 @@ import {
   queryMethod,
 } from '@typegoose/typegoose';
 import { AsQueryMethod, ReturnModelType } from '@typegoose/typegoose/lib/types';
-import { Length, MaxLength, MinLength } from 'class-validator';
+import { IsOptional, Length, MaxLength, MinLength } from 'class-validator';
 import { Field, InputType, ObjectType } from 'type-graphql';
 import { nanoid } from 'common/utils/string';
 import { Category } from 'schemas/category.schema';
@@ -103,21 +103,28 @@ export class GetOrDeleteArticleInput {
 
 @InputType()
 export class UpdateArticleInput {
+  @Field(() => String)
+  articleId: string;
+
   @MinLength(4, {
     message: 'Category must have at least 4 chars length.',
   })
   @MaxLength(32, {
     message: 'Category should not be longer than 32 chars.',
   })
-  @Field(() => String)
-  category: string; // category name
+  @Field(() => String, { nullable: true })
+  @IsOptional()
+  category?: string; // category name
 
-  @Field(() => String)
-  name: string;
+  @Field(() => String, { nullable: true })
+  @IsOptional()
+  name?: string;
 
-  @Field(() => String)
-  body: string;
+  @Field(() => String, { nullable: true })
+  @IsOptional()
+  body?: string;
 
-  @Field(() => String)
-  thumbnailUrl: string;
+  @Field(() => String, { nullable: true })
+  @IsOptional()
+  thumbnailUrl?: string;
 }

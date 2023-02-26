@@ -12,7 +12,7 @@ const IncreaseArticleViews: MiddlewareFn<Context> = async ({ args }, next) => {
     { $inc: { views: 1 } },
   ).lean();
 
-  if (updateResult.modifiedCount === 0) {
+  if (updateResult.matchedCount === 0) {
     console.warn('Unable to increase views. The article does not exist.');
   }
 
