@@ -35,6 +35,7 @@ export class ArticleController {
       author: user._id,
       views: 0,
       created_at: getTimestamp(),
+      comments: [],
     };
     return ArticleModel.create(payload);
   }
@@ -87,6 +88,8 @@ export class ArticleController {
     const result = await ArticleModel.deleteOne({
       article_id: input.articleId,
     }).lean();
+
+    // TODO: Delete all article comments and its child. Find all by article ID - recursive iteration and remove.
 
     if (result.deletedCount === 0) {
       throw new GraphQLError(ERROR_MESSAGE.ARTICLE_NOT_EXIST, {

@@ -11,6 +11,7 @@ import { Field, InputType, ObjectType } from 'type-graphql';
 import { nanoid } from 'common/utils/string';
 import { Category } from 'schemas/category.schema';
 import { User } from 'schemas/user.schema';
+import { Comment } from 'schemas/comment.schema';
 
 interface QueryHelper {
   findByArticleId: AsQueryMethod<typeof findByArticleId>;
@@ -64,9 +65,11 @@ export class Article {
 
   @Field(() => String)
   @prop({ required: false })
-  thumbnailUrl: string;
+  thumbnail_url: string;
 
-  // TODO: add comments
+  @Field(() => [String])
+  @prop({ required: true, ref: () => Array<Comment> })
+  comments: Ref<Comment[]>;
 }
 
 export const ArticleModel = getModelForClass<typeof Article, QueryHelper>(
@@ -91,7 +94,7 @@ export class CreateArticleInput {
   body: string;
 
   @Field(() => String)
-  thumbnailUrl: string;
+  thumbnail_url: string;
 }
 
 @InputType()
@@ -126,5 +129,5 @@ export class UpdateArticleInput {
 
   @Field(() => String, { nullable: true })
   @IsOptional()
-  thumbnailUrl?: string;
+  thumbnail_url?: string;
 }
