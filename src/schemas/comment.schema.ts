@@ -51,9 +51,9 @@ export class Comment {
   @prop({ required: true })
   body: string;
 
-  @Field(() => [Comment])
-  @prop({ required: false, ref: () => Array<Comment> })
-  answers: Ref<Comment[]>;
+  @Field(() => [String])
+  @prop({ required: true, ref: () => Comment })
+  answers: Ref<Comment>[];
 
   @Field(() => Number)
   @prop({ required: true })
@@ -69,14 +69,15 @@ export class CreateCommentInput {
   @Field(() => String)
   articleId: string;
 
-  @Field(() => String)
-  author: string;
-
   @MinLength(4, {
     message: 'Comment must have at least 6 chars length.',
   })
   @Field(() => String)
   body: string;
+
+  @Field(() => String, { nullable: true }) // if it is an answer to other comment
+  @IsOptional()
+  commentId?: string;
 }
 
 @InputType()
@@ -93,9 +94,9 @@ export class UpdateCommentInput {
 
   @Field(() => String, { nullable: true })
   @IsOptional()
-  body: string;
+  body?: string;
 
   @Field(() => [String], { nullable: true })
   @IsOptional()
-  answers: string[];
+  answers?: string[];
 }
