@@ -39,7 +39,7 @@ export class Article {
   })
   article_id: string;
 
-  @Field(() => String)
+  @Field(() => Category)
   @prop({ required: true, ref: () => Category })
   category: Ref<Category>;
 
@@ -51,7 +51,7 @@ export class Article {
   @prop({ required: true })
   body: string;
 
-  @Field(() => String)
+  @Field(() => User)
   @prop({ required: true, ref: () => User })
   author: Ref<User>;
 
@@ -69,7 +69,7 @@ export class Article {
 
   @Field(() => [String])
   @prop({ required: true, ref: () => Array<Comment> })
-  comments: Ref<Comment[]>;
+  comments_ids: Ref<Comment>[];
 }
 
 export const ArticleModel = getModelForClass<typeof Article, QueryHelper>(

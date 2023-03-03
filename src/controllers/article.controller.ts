@@ -35,17 +35,30 @@ export class ArticleController {
       author: user._id,
       views: 0,
       created_at: getTimestamp(),
-      comments: [],
+      comments_ids: [],
     };
     return ArticleModel.create(payload);
   }
 
   async getArticle(input: GetOrDeleteArticleInput) {
-    return await ArticleModel.find().findByArticleId(input.articleId).lean();
+    return await ArticleModel.find()
+      .populate({
+        path: 'author',
+        select: 'name email roles',
+      })
+      .populate('category')
+      .findByArticleId(input.articleId)
+      .lean();
   }
 
   async getArticles() {
-    return await ArticleModel.find().lean();
+    return await ArticleModel.find()
+      .populate({
+        path: 'author',
+        select: 'name email roles',
+      })
+      .populate('category')
+      .lean();
   }
 
   async updateArticle({ articleId, category, ...input }: UpdateArticleInput) {
@@ -78,6 +91,11 @@ export class ArticleController {
     }
 
     const modifiedArticle = await ArticleModel.find()
+      .populate({
+        path: 'author',
+        select: 'name email roles',
+      })
+      .populate('category')
       .findByArticleId(articleId)
       .lean();
 
@@ -89,7 +107,7 @@ export class ArticleController {
       article_id: input.articleId,
     }).lean();
 
-    // TODO: Delete all article comments and its child. Find all by article ID - recursive iteration and remove.
+    // TODO: Delete all article comments and its child. Find all by article ID - recursive iteration and remove!
 
     if (result.deletedCount === 0) {
       throw new GraphQLError(ERROR_MESSAGE.ARTICLE_NOT_EXIST, {

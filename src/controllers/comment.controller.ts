@@ -49,7 +49,7 @@ export class CommentController {
       } else {
         updateResult = await ArticleModel.updateOne(
           { article_id: articleId },
-          { $push: { comments: result._id } },
+          { $push: { comments_ids: result._id } },
         );
       }
 
@@ -72,11 +72,44 @@ export class CommentController {
   }
 
   async getComment(input: GetOrDeleteCommentInput) {
-    return await CommentModel.find().findByCommentId(input.commentId).lean();
+    return await CommentModel.find()
+      .populate({
+        path: 'author',
+        select: 'name email roles',
+      })
+      .populate({
+        path: 'answers',
+        populate: [
+          {
+            path: 'answers',
+          },
+          {
+            path: 'author',
+          },
+        ],
+      })
+      .findByCommentId(input.commentId)
+      .lean();
   }
 
   async getComments() {
-    return await CommentModel.find().lean();
+    return await CommentModel.find()
+      .populate({
+        path: 'author',
+        select: 'name email roles',
+      })
+      .populate({
+        path: 'answers',
+        populate: [
+          {
+            path: 'answers',
+          },
+          {
+            path: 'author',
+          },
+        ],
+      })
+      .lean();
   }
 
   async updateComment(input: UpdateCommentInput) {

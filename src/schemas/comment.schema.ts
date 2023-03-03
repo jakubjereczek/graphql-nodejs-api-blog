@@ -43,7 +43,7 @@ export class Comment {
   @prop({ ref: () => Article })
   article_id: Ref<Article>;
 
-  @Field(() => String)
+  @Field(() => User)
   @prop({ required: true, ref: () => User })
   author: Ref<User>;
 
@@ -51,7 +51,7 @@ export class Comment {
   @prop({ required: true })
   body: string;
 
-  @Field(() => [String])
+  @Field(() => [Comment])
   @prop({ required: true, ref: () => Comment })
   answers: Ref<Comment>[];
 
