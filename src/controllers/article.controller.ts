@@ -8,6 +8,8 @@ import {
   UpdateArticleInput,
 } from 'schemas/article.schema';
 import { CategoryModel } from 'schemas/category.schema';
+import { CommentModel } from 'schemas/comment.schema';
+import { getArticleRecursiveCommentsIds } from 'utils/article.utils';
 
 export class ArticleController {
   async createArticle(
@@ -103,11 +105,25 @@ export class ArticleController {
   }
 
   async deleteArticle(input: GetOrDeleteArticleInput) {
+    const article = await ArticleModel.find()
+      .findByArticleId(input.articleId)
+      .lean();
+
+    if (!article) {
+      throw new GraphQLError(ERROR_MESSAGE.ARTICLE_NOT_EXIST, {
+        code: ERROR_CODE.BAD_USER_INPUT,
+        statusCode: 400,
+      });
+    }
+
     const result = await ArticleModel.deleteOne({
       article_id: input.articleId,
     }).lean();
 
-    // TODO: Delete all article comments and its child. Find all by article ID - recursive iteration and remove!
+    // TODO:
+    const allCommendsIds = (
+      await getArticleRecursiveCommentsIds(article.article_id)
+    ).reverse();
 
     if (result.deletedCount === 0) {
       throw new GraphQLError(ERROR_MESSAGE.ARTICLE_NOT_EXIST, {
