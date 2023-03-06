@@ -2,32 +2,34 @@ import { LeanDocument } from 'mongoose';
 import { Article, ArticleModel } from 'schemas/article.schema';
 import { Comment, CommentModel } from 'schemas/comment.schema';
 
-export async function getArticleRecursiveCommentsIds(articleId: string) {
+export async function getRecursiveArticleCommentsIds(articleId: string) {
   const article = await ArticleModel.find().findByArticleId(articleId).lean();
 
   if (!article) {
     return [];
   }
 
-  const innerComments = [...article.comments_ids];
+  const innerComments: string[] = [];
   async function getInner(document: LeanDocument<Article | Comment>) {
     if (isArticle(document)) {
       for (const commentId of document.comments_ids) {
         const innerComment = await CommentModel.find()
           .findByCommentId(commentId as string)
           .lean();
+
         if (innerComment) {
           await getInner(innerComment);
         }
       }
     } else if (isComment(document)) {
-      const innerComment = await CommentModel.find()
-        .findByCommentId(document.comment_id)
-        .lean();
-      if (innerComment) {
-        for (const answer of innerComment.answers) {
-          const comment = answer as LeanDocument<Comment>;
-          innerComments.push(comment.comment_id);
+      const { comment_id, answers } = document;
+      innerComments.push(comment_id);
+
+      for (const answer of answers) {
+        const comment = await CommentModel.find()
+          .findByCommentId(answer as string)
+          .lean();
+        if (comment) {
           await getInner(comment);
         }
       }

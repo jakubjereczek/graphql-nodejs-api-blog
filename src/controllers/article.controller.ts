@@ -8,8 +8,7 @@ import {
   UpdateArticleInput,
 } from 'schemas/article.schema';
 import { CategoryModel } from 'schemas/category.schema';
-import { CommentModel } from 'schemas/comment.schema';
-import { getArticleRecursiveCommentsIds } from 'utils/article.utils';
+import { getRecursiveArticleCommentsIds } from 'utils/article.utils';
 
 export class ArticleController {
   async createArticle(
@@ -122,7 +121,7 @@ export class ArticleController {
 
     // TODO:
     const allCommendsIds = (
-      await getArticleRecursiveCommentsIds(article.article_id)
+      await getRecursiveArticleCommentsIds(article.article_id)
     ).reverse();
 
     if (result.deletedCount === 0) {
