@@ -6,10 +6,10 @@ import {
   AuthorizeUserInput,
   CreateUserInput,
   UserModel,
-  mapUserIntoUserIdentifier,
   User,
 } from 'schemas/user.schema';
 import { ERROR_CODE, ERROR_MESSAGE, GraphQLError } from 'common/utils/error';
+import { mapUserIntoUserIdentifier } from 'utils/user.utils';
 
 export class UserController {
   async createUser(input: CreateUserInput) {

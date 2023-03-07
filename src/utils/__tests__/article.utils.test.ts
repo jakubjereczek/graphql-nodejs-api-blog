@@ -21,10 +21,8 @@ jest.mock('schemas/article.schema', () => ({
 jest.mock('schemas/comment.schema', () => ({
   ...jest.requireActual('schemas/comment.schema'),
   CommentModel: {
-    find: jest.fn().mockReturnValue({
-      findByCommentId: jest.fn().mockReturnValue({
-        lean: jest.fn(),
-      }),
+    findById: jest.fn().mockReturnValue({
+      lean: jest.fn(),
     }),
   },
 }));
@@ -36,15 +34,11 @@ describe('article.utils', () => {
         ArticleModel.find().findByArticleId('any-id')
           .lean as unknown as jest.Mock
       ).mockResolvedValue(mockedArticle);
-      CommentModel.find = jest.fn().mockReturnValue({
-        findByCommentId: jest.fn().mockImplementation((commentId: string) => ({
-          lean: jest.fn().mockImplementation(() => {
-            return mockedAllComments.find(
-              (comment) => comment.comment_id === commentId,
-            );
-          }),
-        })),
-      });
+      CommentModel.findById = jest.fn().mockImplementation((_id: string) => ({
+        lean: jest.fn().mockImplementation(() => {
+          return mockedAllComments.find((comment) => comment._id === _id);
+        }),
+      }));
       const result = await getRecursiveArticleCommentsIds(mockedArticleId);
 
       expect(result).toEqual([

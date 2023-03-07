@@ -8,6 +8,7 @@ import {
   UpdateArticleInput,
 } from 'schemas/article.schema';
 import { CategoryModel } from 'schemas/category.schema';
+import { CommentModel } from 'schemas/comment.schema';
 import { getRecursiveArticleCommentsIds } from 'utils/article.utils';
 
 export class ArticleController {
@@ -115,14 +116,17 @@ export class ArticleController {
       });
     }
 
+    await CommentModel.deleteMany({
+      comment_id: {
+        $in: (
+          await getRecursiveArticleCommentsIds(article.article_id)
+        ).reverse(),
+      },
+    });
+
     const result = await ArticleModel.deleteOne({
       article_id: input.articleId,
     }).lean();
-
-    // TODO:
-    const allCommendsIds = (
-      await getRecursiveArticleCommentsIds(article.article_id)
-    ).reverse();
 
     if (result.deletedCount === 0) {
       throw new GraphQLError(ERROR_MESSAGE.ARTICLE_NOT_EXIST, {

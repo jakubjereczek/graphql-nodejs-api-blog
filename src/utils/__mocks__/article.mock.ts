@@ -50,7 +50,7 @@ export const mockedInnerComments: LeanDocument<Comment[]> = [
     article_id: mockedArticleId,
     author: 'mockedAuthor',
     body: 'mockedBody',
-    answers: ['comment-1-3-1', 'comment-1-3-2'],
+    answers: ['602e06c050d20d3f19e3f0158', '602e06c05010d3f19ess0159'],
     created_at: 1678130376700,
   },
 ];
@@ -62,7 +62,11 @@ export const mockedComments: LeanDocument<Comment[]> = [
     article_id: mockedArticleId,
     author: 'mockedAuthor',
     body: 'mockedBody',
-    answers: ['comment-1-1', 'comment-1-2', 'comment-1-3'],
+    answers: [
+      '602e06c05010d3f19e3f0158',
+      '602e06c05010d3f19e3f0159',
+      '602e06c05010d3f19e3f015a',
+    ],
     created_at: 1678130376700,
   },
   {
@@ -82,7 +86,7 @@ export const mockedAllComments = [
   ...mockedInnerDepthComments,
 ];
 
-const mockedCommentsIds = mockedComments.map((comment) => comment.comment_id);
+const mockedCommentsIds = mockedComments.map((comment) => comment._id);
 
 export const mockedArticle: LeanDocument<Article> = {
   _id: 'mockedId',

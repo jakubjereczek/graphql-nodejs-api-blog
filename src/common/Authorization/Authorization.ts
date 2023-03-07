@@ -2,10 +2,11 @@ import { ApolloError } from 'apollo-server';
 import { CookieOptions } from 'express';
 import Context from 'common/types/Context';
 import { signJwt, verifyJwt } from 'common/utils/jwt';
-import { UserModel, mapUserIntoUserIdentifier } from 'schemas/user.schema';
+import { UserModel } from 'schemas/user.schema';
 import { UserIdentifier } from 'common/types/User';
 import { JwtTokenType } from 'common/types/Jwt';
 import { ERROR_CODE, ERROR_MESSAGE } from 'common/utils/error';
+import { mapUserIntoUserIdentifier } from 'utils/user.utils';
 
 export const KEY_ACCESS = 'access_token';
 export const KEY_REFRESH = 'refresh_token';

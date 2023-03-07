@@ -4,7 +4,6 @@ import { Comment, CommentModel } from 'schemas/comment.schema';
 
 export async function getRecursiveArticleCommentsIds(articleId: string) {
   const article = await ArticleModel.find().findByArticleId(articleId).lean();
-
   if (!article) {
     return [];
   }
@@ -12,11 +11,8 @@ export async function getRecursiveArticleCommentsIds(articleId: string) {
   const innerComments: string[] = [];
   async function getInner(document: LeanDocument<Article | Comment>) {
     if (isArticle(document)) {
-      for (const commentId of document.comments_ids) {
-        const innerComment = await CommentModel.find()
-          .findByCommentId(commentId as string)
-          .lean();
-
+      for (const _id of document.comments_ids) {
+        const innerComment = await CommentModel.findById(_id).lean();
         if (innerComment) {
           await getInner(innerComment);
         }
@@ -25,10 +21,8 @@ export async function getRecursiveArticleCommentsIds(articleId: string) {
       const { comment_id, answers } = document;
       innerComments.push(comment_id);
 
-      for (const answer of answers) {
-        const comment = await CommentModel.find()
-          .findByCommentId(answer as string)
-          .lean();
+      for (const _id of answers) {
+        const comment = await CommentModel.findById(_id).lean();
         if (comment) {
           await getInner(comment);
         }

@@ -8,7 +8,6 @@ import {
 import { AsQueryMethod, ReturnModelType } from '@typegoose/typegoose/lib/types';
 import { Field, InputType, ObjectType } from 'type-graphql';
 import { IsEmail, MaxLength, MinLength } from 'class-validator';
-import { UserIdentifier } from 'common/types/User';
 import { hash } from 'common/utils/hash';
 
 interface QueryHelper {
@@ -92,17 +91,4 @@ export class UserAuthorizationToken {
   @Field(() => String)
   @prop({ required: true })
   refresh_token: string;
-}
-
-// schema utils
-export function mapUserIntoUserIdentifier({
-  _id,
-  email,
-  roles,
-}: User): UserIdentifier {
-  return {
-    _id,
-    email,
-    roles,
-  };
 }
