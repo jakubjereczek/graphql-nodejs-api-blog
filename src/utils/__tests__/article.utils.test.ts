@@ -1,10 +1,11 @@
 import { ArticleModel } from 'schemas/article.schema';
 import { CommentModel } from 'schemas/comment.schema';
-import { getRecursiveArticleCommentsIds } from 'utils/article.utils';
+import { getRecursiveCommentsIds } from 'utils/article.utils';
 import {
   mockedAllComments,
   mockedArticle,
   mockedArticleId,
+  mockedInnerComments,
 } from 'utils/__mocks__/article.mock';
 
 jest.mock('schemas/article.schema', () => ({
@@ -24,11 +25,16 @@ jest.mock('schemas/comment.schema', () => ({
     findById: jest.fn().mockReturnValue({
       lean: jest.fn(),
     }),
+    find: jest.fn().mockReturnValue({
+      findByCommentId: jest.fn().mockReturnValue({
+        lean: jest.fn(),
+      }),
+    }),
   },
 }));
 
 describe('article.utils', () => {
-  describe('getRecursiveArticleCommentsIds method', () => {
+  describe('getRecursiveCommentsIds method', () => {
     it('it should return all article inner depth commends ids', async () => {
       (
         ArticleModel.find().findByArticleId('any-id')
@@ -39,7 +45,10 @@ describe('article.utils', () => {
           return mockedAllComments.find((comment) => comment._id === _id);
         }),
       }));
-      const result = await getRecursiveArticleCommentsIds(mockedArticleId);
+      const result = await getRecursiveCommentsIds({
+        id: mockedArticleId,
+        isArticle: true,
+      });
 
       expect(result).toEqual([
         'comment-1',
@@ -50,6 +59,20 @@ describe('article.utils', () => {
         'comment-1-3-2',
         'comment-2',
       ]);
+    });
+
+    it('should return all comments inner answers ids and its id', async () => {
+      (
+        CommentModel.find().findByCommentId('any-id')
+          .lean as unknown as jest.Mock
+      ).mockResolvedValue(mockedInnerComments[2]);
+
+      const result = await getRecursiveCommentsIds({
+        id: '0',
+        isArticle: false,
+      });
+
+      expect(result).toEqual(['comment-1-3', 'comment-1-3-1', 'comment-1-3-2']);
     });
   });
 });

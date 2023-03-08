@@ -20,14 +20,14 @@ export async function getRecursiveCommentsIds({
 
   const innerComments: string[] = [];
   async function getInner(document: LeanDocument<Article | Comment>) {
-    if (isArticleType(document)) {
+    if (checkArticle(document)) {
       for (const _id of document.comments_ids) {
         const innerComment = await CommentModel.findById(_id).lean();
         if (innerComment) {
           await getInner(innerComment);
         }
       }
-    } else if (isCommentType(document)) {
+    } else if (checkComment(document)) {
       const { comment_id, answers } = document;
       innerComments.push(comment_id);
 
@@ -44,13 +44,13 @@ export async function getRecursiveCommentsIds({
   return innerComments;
 }
 
-function isArticleType(
+function checkArticle(
   document: LeanDocument<Article | Comment>,
 ): document is LeanDocument<Article> {
   return (document as LeanDocument<Article>).comments_ids !== undefined;
 }
 
-function isCommentType(
+function checkComment(
   document: LeanDocument<Article | Comment>,
 ): document is LeanDocument<Comment> {
   return (document as LeanDocument<Comment>).comment_id !== undefined;
