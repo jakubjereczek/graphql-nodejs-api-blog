@@ -1,4 +1,5 @@
 import Context from 'common/types/Context';
+import { Role } from 'common/types/Role';
 import { getTimestamp } from 'common/utils/datetime';
 import { ERROR_CODE, ERROR_MESSAGE, GraphQLError } from 'common/utils/error';
 import { ArticleModel } from 'schemas/article.schema';
@@ -40,20 +41,20 @@ export class CommentController {
       };
       const result = await CommentModel.create(payload);
 
-      let updateResult;
+      let commentReference;
       if (commentId) {
-        updateResult = await CommentModel.updateOne(
+        commentReference = await CommentModel.updateOne(
           { comment_id: commentId },
           { $push: { answers: result._id } },
         );
       } else {
-        updateResult = await ArticleModel.updateOne(
+        commentReference = await ArticleModel.updateOne(
           { article_id: articleId },
           { $push: { comments_ids: result._id } },
         );
       }
 
-      if (updateResult.modifiedCount === 0) {
+      if (commentReference.modifiedCount === 0) {
         throw new GraphQLError(ERROR_MESSAGE.CATEGORY_NOT_EXIST, {
           code: ERROR_CODE.BAD_USER_INPUT,
           statusCode: 400,
@@ -112,8 +113,40 @@ export class CommentController {
       .lean();
   }
 
-  async updateComment(input: UpdateCommentInput) {
-    // TODO.
+  async updateComment(
+    { commentId, ...input }: UpdateCommentInput,
+    { user }: Context,
+  ) {
+    const comment = await CommentModel.find().findByCommentId(commentId).lean();
+    if (!comment) {
+      throw new GraphQLError(ERROR_MESSAGE.COMMENT_NOT_EXIST, {
+        code: ERROR_CODE.BAD_USER_INPUT,
+        statusCode: 400,
+      });
+    }
+
+    if (user?._id === comment.author || user?.roles.includes(Role.Moderator)) {
+      const result = await CommentModel.updateOne(
+        { comment_id: commentId },
+        {
+          ...input,
+        },
+      ).lean();
+
+      if (result.matchedCount === 0) {
+        throw new GraphQLError(ERROR_MESSAGE.COMMENT_NOT_EXIST, {
+          code: ERROR_CODE.BAD_USER_INPUT,
+          statusCode: 400,
+        });
+      }
+    } else {
+      throw new GraphQLError(ERROR_MESSAGE.COMMENT_CANNOT_DELETE, {
+        code: ERROR_CODE.UNAUTHORIZED,
+        statusCode: 403,
+      });
+    }
+
+    return await CommentModel.find().findByCommentId(commentId).lean();
   }
 
   async deleteComment(input: GetOrDeleteCommentInput) {

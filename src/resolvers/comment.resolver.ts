@@ -34,8 +34,11 @@ export default class CommentResolver {
   }
 
   @Mutation(() => Comment)
-  updateComment(@Arg('input') input: UpdateCommentInput) {
-    return this.commentController.updateComment(input);
+  updateComment(
+    @Arg('input') input: UpdateCommentInput,
+    @Ctx() context: Context,
+  ) {
+    return this.commentController.updateComment(input, context);
   }
 
   @Mutation(() => Boolean)

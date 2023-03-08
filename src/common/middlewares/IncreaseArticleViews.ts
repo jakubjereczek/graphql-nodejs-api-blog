@@ -7,13 +7,15 @@ const IncreaseArticleViews: MiddlewareFn<Context> = async ({ args }, next) => {
     return next();
   }
 
-  const updateResult = await ArticleModel.updateOne(
+  const result = await ArticleModel.updateOne(
     { article_id: args.input.articleId },
     { $inc: { views: 1 } },
   ).lean();
 
-  if (updateResult.matchedCount === 0) {
-    console.warn('Unable to increase views. The article does not exist.');
+  if (result.matchedCount === 0) {
+    console.warn(
+      'The article does not exist - unable to increase views count.',
+    );
   }
 
   return next();

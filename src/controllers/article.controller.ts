@@ -9,7 +9,7 @@ import {
 } from 'schemas/article.schema';
 import { CategoryModel } from 'schemas/category.schema';
 import { CommentModel } from 'schemas/comment.schema';
-import { getRecursiveArticleCommentsIds } from 'utils/article.utils';
+import { getRecursiveCommentsIds } from 'utils/article.utils';
 
 export class ArticleController {
   async createArticle(
@@ -77,7 +77,7 @@ export class ArticleController {
       categoryId = catg._id;
     }
 
-    const updateResult = await ArticleModel.updateOne(
+    const result = await ArticleModel.updateOne(
       { article_id: articleId },
       {
         ...input,
@@ -85,14 +85,14 @@ export class ArticleController {
       },
     ).lean();
 
-    if (updateResult.matchedCount === 0) {
+    if (result.matchedCount === 0) {
       throw new GraphQLError(ERROR_MESSAGE.ARTICLE_NOT_EXIST, {
         code: ERROR_CODE.BAD_USER_INPUT,
         statusCode: 400,
       });
     }
 
-    const modifiedArticle = await ArticleModel.find()
+    const article = await ArticleModel.find()
       .populate({
         path: 'author',
         select: 'name email roles',
@@ -101,7 +101,7 @@ export class ArticleController {
       .findByArticleId(articleId)
       .lean();
 
-    return modifiedArticle;
+    return article;
   }
 
   async deleteArticle(input: GetOrDeleteArticleInput) {
@@ -119,7 +119,10 @@ export class ArticleController {
     await CommentModel.deleteMany({
       comment_id: {
         $in: (
-          await getRecursiveArticleCommentsIds(article.article_id)
+          await getRecursiveCommentsIds({
+            id: article.article_id,
+            isArticle: true,
+          })
         ).reverse(),
       },
     });

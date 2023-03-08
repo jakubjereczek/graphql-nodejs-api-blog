@@ -2,22 +2,32 @@ import { LeanDocument } from 'mongoose';
 import { Article, ArticleModel } from 'schemas/article.schema';
 import { Comment, CommentModel } from 'schemas/comment.schema';
 
-export async function getRecursiveArticleCommentsIds(articleId: string) {
-  const article = await ArticleModel.find().findByArticleId(articleId).lean();
-  if (!article) {
+interface GetRecursiveCommentsIdsArgs {
+  id: string;
+  isArticle: boolean;
+}
+
+export async function getRecursiveCommentsIds({
+  id,
+  isArticle,
+}: GetRecursiveCommentsIdsArgs) {
+  const value = isArticle
+    ? await ArticleModel.find().findByArticleId(id).lean()
+    : await CommentModel.find().findByCommentId(id).lean();
+  if (!value) {
     return [];
   }
 
   const innerComments: string[] = [];
   async function getInner(document: LeanDocument<Article | Comment>) {
-    if (isArticle(document)) {
+    if (isArticleType(document)) {
       for (const _id of document.comments_ids) {
         const innerComment = await CommentModel.findById(_id).lean();
         if (innerComment) {
           await getInner(innerComment);
         }
       }
-    } else if (isComment(document)) {
+    } else if (isCommentType(document)) {
       const { comment_id, answers } = document;
       innerComments.push(comment_id);
 
@@ -29,18 +39,18 @@ export async function getRecursiveArticleCommentsIds(articleId: string) {
       }
     }
   }
+  await getInner(value);
 
-  await getInner(article);
   return innerComments;
 }
 
-function isArticle(
+function isArticleType(
   document: LeanDocument<Article | Comment>,
 ): document is LeanDocument<Article> {
   return (document as LeanDocument<Article>).comments_ids !== undefined;
 }
 
-function isComment(
+function isCommentType(
   document: LeanDocument<Article | Comment>,
 ): document is LeanDocument<Comment> {
   return (document as LeanDocument<Comment>).comment_id !== undefined;

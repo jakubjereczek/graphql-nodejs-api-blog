@@ -28,7 +28,7 @@ export class CategoryController {
   }
 
   async updateCategory(input: UpdateCategoryInput) {
-    const updateResult = await CategoryModel.updateOne(
+    const result = await CategoryModel.updateOne(
       { name: input.name },
       {
         ...input,
@@ -36,18 +36,18 @@ export class CategoryController {
       },
     ).lean();
 
-    if (updateResult.modifiedCount === 0) {
+    if (result.modifiedCount === 0) {
       throw new GraphQLError(ERROR_MESSAGE.CATEGORY_NOT_EXIST, {
         code: ERROR_CODE.BAD_USER_INPUT,
         statusCode: 400,
       });
     }
 
-    const modifiedCategory = await CategoryModel.find()
+    const category = await CategoryModel.find()
       .findByName(input.newName)
       .lean();
 
-    return modifiedCategory;
+    return category;
   }
 
   async deleteCategory(input: GetOrDeleteCategoryInput) {

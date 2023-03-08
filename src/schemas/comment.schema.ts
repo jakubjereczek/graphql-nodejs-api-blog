@@ -90,13 +90,9 @@ export class GetOrDeleteCommentInput {
 @InputType()
 export class UpdateCommentInput {
   @Field(() => String)
-  articleId: string;
+  commentId: string;
 
   @Field(() => String, { nullable: true })
   @IsOptional()
   body?: string;
-
-  @Field(() => [String], { nullable: true })
-  @IsOptional()
-  answers?: string[];
 }

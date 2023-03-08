@@ -18,6 +18,9 @@ export const ERROR_MESSAGE = {
   USER_ALREADY_EXIST: 'User with this email already exists in the database.',
   USER_NOT_EXIST: 'User with this email does not exist in the database.',
   USER_INVALID_AUTHORIZATION: 'Invalid email or password.',
+  COMMENT_NOT_EXIST: 'Comment with this id does not exist in the database',
+  COMMENT_CANNOT_DELETE:
+    'The user cannot delete a comment that they are not the author of',
 };
 
 export enum ERROR_CODE {
