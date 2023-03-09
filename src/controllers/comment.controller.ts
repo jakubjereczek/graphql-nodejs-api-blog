@@ -10,6 +10,7 @@ import {
   GetOrDeleteCommentInput,
   UpdateCommentInput,
 } from 'schemas/comment.schema';
+import { getRecursiveCommentsIds } from 'utils/article.utils';
 
 export class CommentController {
   async createComment(
@@ -149,7 +150,41 @@ export class CommentController {
     return await CommentModel.find().findByCommentId(commentId).lean();
   }
 
-  async deleteComment(input: GetOrDeleteCommentInput) {
-    // TODO.
+  async deleteComment(input: GetOrDeleteCommentInput, { user }: Context) {
+    const comment = await CommentModel.find()
+      .findByCommentId(input.commentId)
+      .lean();
+
+    if (!comment) {
+      throw new GraphQLError(ERROR_MESSAGE.COMMENT_NOT_EXIST, {
+        code: ERROR_CODE.BAD_USER_INPUT,
+        statusCode: 400,
+      });
+    }
+    if (user?._id === comment.author || user?.roles.includes(Role.Moderator)) {
+      const result = await CommentModel.deleteMany({
+        comment_id: {
+          $in: (
+            await getRecursiveCommentsIds({
+              id: comment.comment_id,
+              isArticle: false,
+            })
+          ).reverse(),
+        },
+      });
+      if (result.deletedCount === 0) {
+        throw new GraphQLError(ERROR_MESSAGE.COMMENT_NOT_EXIST, {
+          code: ERROR_CODE.BAD_USER_INPUT,
+          statusCode: 400,
+        });
+      }
+
+      return result.deletedCount > 0;
+    } else {
+      throw new GraphQLError(ERROR_MESSAGE.COMMENT_CANNOT_DELETE, {
+        code: ERROR_CODE.UNAUTHORIZED,
+        statusCode: 403,
+      });
+    }
   }
 }

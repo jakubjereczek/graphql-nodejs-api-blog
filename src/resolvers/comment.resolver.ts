@@ -1,5 +1,4 @@
 import { Arg, Authorized, Ctx, Mutation, Query } from 'type-graphql';
-import { Role } from 'common/types/Role';
 import { CommentController } from 'controllers/comment.controller';
 import {
   CreateCommentInput,
@@ -33,6 +32,7 @@ export default class CommentResolver {
     return this.commentController.getComments();
   }
 
+  // author or moderator
   @Mutation(() => Comment)
   updateComment(
     @Arg('input') input: UpdateCommentInput,
@@ -41,9 +41,12 @@ export default class CommentResolver {
     return this.commentController.updateComment(input, context);
   }
 
+  // author or moderator
   @Mutation(() => Boolean)
-  @Authorized([Role.Moderator])
-  deleteComment(@Arg('input') input: GetOrDeleteCommentInput) {
-    return this.commentController.deleteComment(input);
+  deleteComment(
+    @Arg('input') input: GetOrDeleteCommentInput,
+    @Ctx() context: Context,
+  ) {
+    return this.commentController.deleteComment(input, context);
   }
 }
