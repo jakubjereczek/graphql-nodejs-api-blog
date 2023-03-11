@@ -66,7 +66,6 @@ describe('article.utils', () => {
         CommentModel.find().findByCommentId('any-id')
           .lean as unknown as jest.Mock
       ).mockResolvedValue(mockedInnerComments[2]);
-
       const result = await getRecursiveCommentsIds({
         id: '0',
         isArticle: false,
