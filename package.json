@@ -21,7 +21,7 @@
     "config": "^3.3.9",
     "cookie-parser": "^1.4.6",
     "dotenv": "^16.0.3",
-    "graphql": "^16.0.0",
+    "graphql": "^16.6.0",
     "graphql-upload": "^15.0.2",
     "jsonwebtoken": "^9.0.0",
     "mongoose": "^6.9.0",
