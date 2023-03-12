@@ -8,6 +8,7 @@ import {
   ApolloServerPluginLandingPageGraphQLPlayground,
   ApolloServerPluginLandingPageProductionDefault,
 } from 'apollo-server-core';
+import graphqlUploadExpress from 'graphql-upload/graphqlUploadExpress.js';
 import Context from 'common/types/Context';
 import { resolvers } from 'resolvers';
 import { connectToMongo } from 'common/utils/mongo';
@@ -70,6 +71,7 @@ export async function createRootUserIfNotExists() {
 export async function bootstrap() {
   const app = express();
   app.use(cookieParser());
+  app.use(graphqlUploadExpress());
 
   const schema = await buildSchema({
     resolvers,
