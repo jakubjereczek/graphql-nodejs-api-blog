@@ -21,6 +21,7 @@ export const ERROR_MESSAGE = {
   COMMENT_NOT_EXIST: 'Comment with this id does not exist in the database',
   COMMENT_CANNOT_DELETE:
     'The user cannot delete a comment that they are not the author of',
+  IMAGE_NOT_EXIST: 'Image with this id does not exist in the database',
 };
 
 export enum ERROR_CODE {

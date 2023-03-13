@@ -6,7 +6,7 @@ import {
 } from '@typegoose/typegoose';
 import { AsQueryMethod, ReturnModelType } from '@typegoose/typegoose/lib/types';
 import { Field, InputType, ObjectType } from 'type-graphql';
-import { IsBase64, Length } from 'class-validator';
+import { IsNotEmpty, Length } from 'class-validator';
 import { FileUpload } from 'graphql-upload/Upload.js';
 import GraphQLUpload from 'graphql-upload/GraphQLUpload.js';
 import { nanoid } from 'common/utils/string';
@@ -40,14 +40,18 @@ export class Image {
   @Field(() => GraphQLUpload, { nullable: true })
   @prop({ type: Buffer })
   image: FileUpload;
+
+  @Field(() => String)
+  @prop({ required: true })
+  mimeType: string;
 }
 
-export const UserModel = getModelForClass<typeof Image, QueryHelper>(Image);
+export const ImageModel = getModelForClass<typeof Image, QueryHelper>(Image);
 
 @InputType()
 export class UploadImageInput {
-  @IsBase64()
   @Field(() => String)
+  @IsNotEmpty()
   image: string;
 }
 
@@ -55,5 +59,5 @@ export class UploadImageInput {
 export class GetOrDeleteImageInput {
   @Field(() => String)
   @Length(14)
-  commentId: string;
+  imageId: string;
 }
