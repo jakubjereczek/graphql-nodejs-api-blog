@@ -38,8 +38,8 @@ export default class UserResolver {
     return this.userController.authorizeUser(input, context);
   }
 
-  @Authorized()
   @Query(() => Boolean)
+  @Authorized()
   logoutUser(@Ctx() context: Context) {
     return this.userController.logoutUser(context);
   }

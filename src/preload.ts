@@ -8,7 +8,7 @@ import {
   ApolloServerPluginLandingPageGraphQLPlayground,
   ApolloServerPluginLandingPageProductionDefault,
 } from 'apollo-server-core';
-import graphqlUploadExpress from 'graphql-upload/graphqlUploadExpress.js';
+import { graphqlUploadExpress } from 'graphql-upload';
 import Context from 'common/types/Context';
 import { resolvers } from 'resolvers';
 import { connectToMongo } from 'common/utils/mongo';
@@ -17,21 +17,18 @@ import { UserModel } from 'schemas/user.schema';
 import { UserConfig } from 'common/types/User';
 import { Role } from 'common/types/Role';
 
-const authChecker: AuthChecker<Context> = function (
-  { context: { user } },
-  roles,
-) {
+const authChecker: AuthChecker<Context> = function ({ context }, roles) {
   if (roles.length === 0) {
-    if (user) {
+    if (context.user) {
       return true;
     }
   }
 
-  if (!user) {
+  if (!context.user) {
     return false;
   }
 
-  if (user.roles.some((role) => roles.includes(role))) {
+  if (context.user.roles.some((role) => roles.includes(role))) {
     return true;
   }
   return false;

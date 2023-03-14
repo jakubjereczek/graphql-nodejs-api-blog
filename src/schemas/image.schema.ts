@@ -7,8 +7,7 @@ import {
 import { AsQueryMethod, ReturnModelType } from '@typegoose/typegoose/lib/types';
 import { Field, InputType, ObjectType } from 'type-graphql';
 import { IsNotEmpty, Length } from 'class-validator';
-import { FileUpload } from 'graphql-upload/Upload.js';
-import GraphQLUpload from 'graphql-upload/GraphQLUpload.js';
+import { GraphQLUpload, FileUpload } from 'graphql-upload';
 import { nanoid } from 'common/utils/string';
 
 interface QueryHelper {
