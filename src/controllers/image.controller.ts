@@ -1,19 +1,28 @@
+import { FileUpload } from 'graphql-upload';
 import { ERROR_CODE, ERROR_MESSAGE, GraphQLError } from 'common/utils/error';
-import { getMimeTypeFromBuffer } from 'common/utils/mineType';
-import {
-  GetOrDeleteImageInput,
-  ImageModel,
-  UploadImageInput,
-} from 'schemas/image.schema';
+import { GetOrDeleteImageInput, ImageModel } from 'schemas/image.schema';
 
 export class ImageController {
-  async uploadImage(input: UploadImageInput) {
-    const buffer = Buffer.from(input.image, 'base64');
-    const mimeType = getMimeTypeFromBuffer(buffer);
+  /**
+   *  The function concatenates file read stream its chunks into
+   * a buffer and create a payload object with base64 encoded
+   * contents, filename and mimetype.
+   */
+  async uploadImage(file: FileUpload) {
+    const { createReadStream, mimetype, filename } = file;
+
+    const chunks: Buffer[] = [];
+    for await (const chunk of createReadStream()) {
+      chunks.push(chunk);
+    }
+    const buffer = Buffer.concat(chunks);
+
     const payload = {
-      image: buffer,
-      mimeType,
+      base64: buffer.toString('base64'),
+      name: filename,
+      mimeType: mimetype,
     };
+
     return ImageModel.create(payload);
   }
 
