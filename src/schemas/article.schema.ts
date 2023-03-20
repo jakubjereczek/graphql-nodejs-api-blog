@@ -12,6 +12,7 @@ import { nanoid } from 'common/utils/string';
 import { Category } from 'schemas/category.schema';
 import { User } from 'schemas/user.schema';
 import { Comment } from 'schemas/comment.schema';
+import { Image } from 'schemas/image.schema';
 
 interface QueryHelper {
   findByArticleId: AsQueryMethod<typeof findByArticleId>;
@@ -65,7 +66,7 @@ export class Article {
 
   @Field(() => String)
   @prop({ required: false })
-  thumbnail_url: string;
+  thumbnail_id: Ref<Image>;
 
   @Field(() => [String])
   @prop({ required: true, ref: () => Array<Comment> })
@@ -94,7 +95,7 @@ export class CreateArticleInput {
   body: string;
 
   @Field(() => String)
-  thumbnail_url: string;
+  thumbnail_id: string;
 }
 
 @InputType()
@@ -129,5 +130,5 @@ export class UpdateArticleInput {
 
   @Field(() => String, { nullable: true })
   @IsOptional()
-  thumbnail_url?: string;
+  thumbnail_id?: string;
 }

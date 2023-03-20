@@ -4,7 +4,7 @@ import { GetOrDeleteImageInput, ImageModel } from 'schemas/image.schema';
 
 export class ImageController {
   /**
-   *  The function concatenates file read stream its chunks into
+   * The function concatenates file read stream its chunks into
    * a buffer and create a payload object with base64 encoded
    * contents, filename and mimetype.
    */

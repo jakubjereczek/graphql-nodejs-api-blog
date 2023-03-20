@@ -9,11 +9,12 @@ import {
 } from 'schemas/article.schema';
 import { CategoryModel } from 'schemas/category.schema';
 import { CommentModel } from 'schemas/comment.schema';
+import { ImageModel } from 'schemas/image.schema';
 import { getRecursiveCommentsIds } from 'utils/article.utils';
 
 export class ArticleController {
   async createArticle(
-    { category: categoryName, ...input }: CreateArticleInput,
+    { category: categoryName, thumbnail_id, ...input }: CreateArticleInput,
     { user }: Context,
   ) {
     if (!user) {
@@ -31,6 +32,19 @@ export class ArticleController {
       });
     }
 
+    let thumbnailId: string | undefined;
+    if (thumbnail_id) {
+      const image = await ImageModel.find().findById(thumbnail_id).lean();
+
+      if (!image) {
+        throw new GraphQLError(ERROR_MESSAGE.IMAGE_NOT_EXIST, {
+          code: ERROR_CODE.BAD_USER_INPUT,
+          statusCode: 400,
+        });
+      }
+      thumbnailId = image._id;
+    }
+
     const payload = {
       ...input,
       category: category._id,
@@ -38,6 +52,7 @@ export class ArticleController {
       views: 0,
       created_at: getTimestamp(),
       comments_ids: [],
+      thumbnail_id: thumbnailId,
     };
     return ArticleModel.create(payload);
   }
@@ -63,7 +78,12 @@ export class ArticleController {
       .lean();
   }
 
-  async updateArticle({ articleId, category, ...input }: UpdateArticleInput) {
+  async updateArticle({
+    articleId,
+    category,
+    thumbnail_id,
+    ...input
+  }: UpdateArticleInput) {
     let categoryId;
     if (category) {
       const catg = await CategoryModel.find().findByName(category).lean();
@@ -77,11 +97,25 @@ export class ArticleController {
       categoryId = catg._id;
     }
 
+    let thumbnailId: string | undefined;
+    if (thumbnail_id) {
+      const image = await ImageModel.find().findById(thumbnail_id).lean();
+
+      if (!image) {
+        throw new GraphQLError(ERROR_MESSAGE.IMAGE_NOT_EXIST, {
+          code: ERROR_CODE.BAD_USER_INPUT,
+          statusCode: 400,
+        });
+      }
+      thumbnailId = image._id;
+    }
+
     const result = await ArticleModel.updateOne(
       { article_id: articleId },
       {
         ...input,
         ...(categoryId && { category: categoryId }),
+        ...(thumbnailId && { thumbnail_id: thumbnailId }),
       },
     ).lean();
 
