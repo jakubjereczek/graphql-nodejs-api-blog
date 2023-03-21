@@ -34,7 +34,7 @@ export class ArticleController {
 
     let thumbnailId: string | undefined;
     if (thumbnail_id) {
-      const image = await ImageModel.find().findById(thumbnail_id).lean();
+      const image = await ImageModel.find().findByImageId(thumbnail_id).lean();
 
       if (!image) {
         throw new GraphQLError(ERROR_MESSAGE.IMAGE_NOT_EXIST, {
@@ -99,7 +99,7 @@ export class ArticleController {
 
     let thumbnailId: string | undefined;
     if (thumbnail_id) {
-      const image = await ImageModel.find().findById(thumbnail_id).lean();
+      const image = await ImageModel.find().findByImageId(thumbnail_id).lean();
 
       if (!image) {
         throw new GraphQLError(ERROR_MESSAGE.IMAGE_NOT_EXIST, {

@@ -97,6 +97,6 @@ export const mockedArticle: LeanDocument<Article> = {
   author: 'mockedAuthor',
   views: 0,
   created_at: 1678130376700,
-  thumbnail_url: 'mockedThumbnailUrl',
+  thumbnail_id: 'thumbnail_id',
   comments_ids: mockedCommentsIds,
 };

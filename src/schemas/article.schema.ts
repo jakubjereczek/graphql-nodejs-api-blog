@@ -94,7 +94,8 @@ export class CreateArticleInput {
   @Field(() => String)
   body: string;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
+  @IsOptional()
   thumbnail_id: string;
 }
 
